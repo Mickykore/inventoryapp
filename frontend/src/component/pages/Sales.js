@@ -1,0 +1,540 @@
+import { useDispatch } from 'react-redux';
+import { Navigate, Link } from 'react-router-dom';
+import {useEffect, useState, useMemo} from 'react';
+import { useSelector } from 'react-redux';
+import { createSales, getSales, deleteSale } from '../../redux/features/sales/saleSlice';
+import { selectName } from '../../redux/features/auth/authSlice';
+import { getallCategories } from '../../redux/features/product/categorySlice';
+import { getComulativeProducts } from '../../redux/features/product/productSlice';
+import { useTable, usePagination, useGlobalFilter } from 'react-table';
+import { GlobalFilter } from '../globalFilter';
+import { useRedirectLogOutUser } from "../../customHook/useRedirectLogOutUser"
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import { MdDeleteForever, MdEditSquare } from "react-icons/md";
+import ButtonLoading from '../../loader/ButtonLoader';
+import ReactToPrint from 'react-to-print';
+import { Invoice } from './invoice/invoice';
+import React, { useRef} from 'react';
+import DailySales from './reports/DailySales';
+import { CumulativeProducts } from './dashBoard/CumulativeProducts';
+
+// class TableToPrint extends React.Component {
+//   render() {
+//     return(
+//     <div className='printOnly'>
+//       <SalePrint Sales={this.props.Sales} />;
+//     </div>
+//     )
+//   }
+// }
+
+
+const initialState = {
+  name: "",
+  category: "",
+  brand: "",
+  singleSalePrice: "",
+  quantity: "",
+  description: "",
+  buyer: {
+    name: "",
+    phoneNumber: "",
+    tinNumber: ""
+  },
+  includeVAT: false,
+  paymentMethod: "",
+  itemIdentification: "",
+  includeVAT: false,
+}
+
+class ComponentToPrint extends React.Component {
+  render() {
+    return(
+    <div className='printOnly'>
+      <Invoice AddedSales={this.props.addedSales} />;
+    </div>
+    )
+  }
+}
+
+export const Sales = () => {
+
+  useRedirectLogOutUser();
+
+  const dispatch = useDispatch();
+  const componentRef = useRef();
+
+  // const navigate = Navigate();
+
+  const [saleForm, setSaleForm] = useState(initialState);
+  const [showSales, setShowSales] = useState("add sales");
+  const [addedSales, setAddedSales] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [printView, setPrintView] = useState(false);
+
+
+  const {name, category, brand, singleSalePrice, quantity, description, buyer, paymentMethod, itemIdentification, includeVAT} = saleForm;
+
+  const seller = useSelector(selectName);
+
+  useEffect(() => {
+    dispatch(getallCategories());
+    dispatch(getComulativeProducts());
+    dispatch(getSales());
+  }, [dispatch]);
+
+  
+
+  const categories = useSelector((state) => state.category.categories);
+  const { ProductsCumulative } = useSelector((state) => state.product);
+  const sales = useSelector((state) => state.sale.sales);
+
+  const handleInputChange = (e) => {
+    setSaleForm({ ...saleForm, [e.target.name]: e.target.value });
+  }
+
+  const addSale = (e) => {
+    e.preventDefault();
+    const data = {
+      name,
+      category,
+      brand,
+      singleSalePrice,
+      quantity,
+      seller,
+      description,
+      buyer, 
+      paymentMethod, 
+      itemIdentification,
+      includeVAT,
+    }
+    setAddedSales([...addedSales, data]);
+    setSaleForm(initialState);
+    // dispatch(createSales(data));
+    // // navigate("/Sales")
+  }
+
+  // const submitSales = () => {
+  //   setIsLoading(true);
+  //   addedSales.map((sale) => {
+  //     dispatch(createSales(sale));
+  //     setAddedSales([]);
+  //   })
+  // }
+  const submitSales = async () => {
+    setIsLoading(true);
+    try {
+        await Promise.all(addedSales.map((sale) => dispatch(createSales(sale))));
+        setAddedSales([]);
+        dispatch(getSales());
+    } catch (error) {
+        // Handle dispatch error if necessary
+    }
+    setIsLoading(false);
+}
+
+  const delSale= async(id) => {
+    dispatch(deleteSale(id));
+    dispatch(getSales());
+  }
+
+  const remove = async (no) => {
+    const newAddedProduct = addedSales.filter((order, index) => index !== no - 1);
+    setAddedSales(newAddedProduct);
+  }
+
+  const ConfirmDelete = (id) => {
+    confirmAlert({
+      title: 'Delete Sale',
+      message: 'Are you sure to delete this Sale?',
+      buttons: [
+        {
+          label: 'Delete',
+          onClick: () => delSale(id)
+        },
+        {
+          label: 'Cancel',
+        }
+      ]
+    });
+  }
+
+  const handlePrint = () => {
+    setPrintView(true);
+  };
+  const handleBeforeGetContent = async () => {
+      await setPrintView(true);
+  };
+
+  const columns = useMemo(() => {
+    const baseColumns = [
+      {
+        Header: 'No',
+        accessor: 'no',
+        Cell: ({ row }) => row.index + 1
+      },
+      {
+        Header: 'Product Name',
+        accessor: 'product.name'
+      },
+      {
+        Header: 'Brand',
+        accessor: 'product.brand'
+      },
+      {
+        Header: 'Category',
+        accessor: 'product.category.name',
+      },
+      {
+        Header: 'Sale Price',
+        accessor: 'singleSalePrice'
+      },
+      {
+        Header: 'Quantity',
+        accessor: 'quantity'
+      },
+      {
+        Header: 'Total Price',
+        accessor: 'totalPrice'
+      },
+      {
+        Header: 'Seller',
+        accessor: 'seller.firstname'
+      },
+      {
+        Header: 'Date',
+        accessor: 'createdAt'
+      }
+    ];
+  
+    if (!printView) {
+      baseColumns.push({
+        Header: 'Action',
+        Cell: ({ row }) => (
+          <>
+            <span className="text-warning" style={{ padding: '5px', cursor: 'pointer' }}>
+              <Link to={`/sale/edit-sale/${row.original._id}`}>
+                <MdEditSquare size={24} />
+              </Link>
+            </span>
+            <span
+              className="text-danger"
+              onClick={() => ConfirmDelete(row.original._id)}
+              style={{ padding: '5px', cursor: 'pointer' }}
+            >
+              <MdDeleteForever size={24} />
+            </span>
+          </>
+        )
+      });
+    }
+  
+    return baseColumns;
+  }, [printView]);
+  
+  const data = useMemo(() => sales, [sales]);
+
+  const tableInstance = useTable({
+    columns,
+    data
+  }, useGlobalFilter, usePagination)
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    page,
+    nextPage,
+    previousPage,
+    canNextPage,
+    canPreviousPage,
+    gotoPage,
+    pageCount,
+    setGlobalFilter,
+    pageOptions,
+    setPageSize,
+    state,
+    prepareRow
+  } = tableInstance;
+
+  const { pageIndex, globalFilter, pageSize } = state;
+
+  const filteredProducts = useMemo(() => {
+    // Filter ProductsCumulative based on the selected category
+    return ProductsCumulative.filter(product => product.category.name === category);
+  }, [category, ProductsCumulative]);
+
+  const uniqueBrands = [...new Set(filteredProducts.map(product => product.brand.toLowerCase()))];
+
+  return (
+    <>
+      <div>
+        <h1 style={{textAlign: "center"}}>Sales</h1>
+
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+            <button  className={(showSales === 'add sales') ? 'nav-link disabled' : 'nav-link'} onClick={() => setShowSales("add sales")}>Add Sales</button>
+            </li>
+            <li class="nav-item">
+            <button  className={(showSales=== 'view sales') ? 'nav-link disabled' : 'nav-link'} onClick={() => setShowSales("view sales")}>Show Sales</button>
+            </li>
+            <li class="nav-item">
+            <button  className={(showSales === 'view Products') ? 'nav-link disabled' : 'nav-link'} onClick={() => setShowSales("view Products")}>View Products</button>
+            </li>
+            <li class="nav-item">
+            <button  className={(showSales=== 'daily sales in cash') ? 'nav-link disabled' : 'nav-link'} onClick={() => setShowSales("daily sales in cash")}>Show Daily Sales cash</button>
+            </li>
+            <li class="nav-item">
+            <button  className={(showSales=== 'daily sales in bank') ? 'nav-link disabled' : 'nav-link'} onClick={() => setShowSales("daily sales in bank")}>Show Daily Sales bank</button>
+            </li>
+          </ul>
+        </div>
+        {(showSales === "add sales") && (
+          <>
+          <form onSubmit={addSale} className=" g-3 col-md-5"style={{fontSize: "1.5rem", padding: "1.5rem"}}>
+            <div className="form-group">
+                  <label htmlFor="category">Category</label>
+                  <select className="form-control form-select form-select-lg" name="category" value={category} onChange={handleInputChange} >
+                      <option value="">Select a category...</option>
+                      {categories.map((category) => (
+                        <option key={category._id} value={category.name}>{category.name}</option>
+                      ))}
+                  </select>
+              </div>
+            <div className="form-group">
+                  <label htmlFor="category">Product Name</label>
+                  <select className="form-control form-select form-select-lg" name="name" value={name} onChange={handleInputChange} >
+                      <option value="">Select Product Name...</option>
+                      {filteredProducts.map((product) => (
+                        <option key={product._id} value={product.name}>{product.name}</option>
+                      ))}
+                  </select>
+                </div>
+              <div className="form-group">
+                  <label htmlFor="category">Brand</label>
+                  <select className="form-control form-select form-select-lg" name="brand" value={brand} onChange={handleInputChange} >
+                      <option value="">Select a Brand...</option>
+                      {uniqueBrands.map((brand) => (
+                        <option key={brand} value={brand}>{brand}</option>
+                      ))}
+                  </select>
+                </div>
+              <div className="form-group">
+                <label htmlFor="singleSalePrice">Selling Price</label>
+                <input type="number" min="1" required className="form-control" id="singleSalePrice" placeholder="Enter Single Sale Price" name="singleSalePrice" value={singleSalePrice} onChange={handleInputChange}/>
+              </div>
+              <div className="form-group">
+              <label className="form-label">Include VAT</label>
+              <div className="form-check form-switch" style={{fontSize: "20px", paddingLeft: "0em"}}>
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="includeVAT"
+                  checked={includeVAT}
+                  style={{marginLeft: "0.1px"}}
+                  onChange={(e) => setSaleForm({ ...saleForm, includeVAT: e.target.checked })}
+                />
+                <label className="form-check-label">-Include VAT</label>
+              </div>
+            </div>
+              <div className="form-group">
+                <label htmlFor="quantity">Quantity</label>
+                <input type="number" min="1" required className="form-control" id="quantity" placeholder="Enter Quantity" name="quantity" value={quantity} onChange={handleInputChange}/>
+              </div>
+              <div className="form-group">
+                <label htmlFor="paymentMethod">Payment Method</label>
+                <select className="form-control" id="paymentMethod" name="paymentMethod" value={paymentMethod} onChange={handleInputChange}>
+                  <option value="">Select Payment Method</option>
+                  <option value="bank">Bank</option>
+                  <option value="cash">Cash</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="itemIdentification">Item Identification</label>
+                <input type="text" className="form-control" id="itemIdentification" placeholder="Enter Item Identification" name="itemIdentification" value={itemIdentification} onChange={handleInputChange} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="description">Discription</label>
+                <textarea type="text" className="form-control" id="description" placeholder="Enter Discription" name="description" value={description} onChange={handleInputChange}/>
+              </div>
+              <br />
+              <h2>Buyer Info</h2>
+              <div className="form-group">
+                <label htmlFor="buyerName">Buyer Name</label>
+                <input type="text" className="form-control" id="buyerName" placeholder="Enter Buyer Name" name="buyerName" value={buyer.buyerName} onChange={(e) => setSaleForm({ ...saleForm, buyer: { ...buyer, buyerName: e.target.value } })} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="buyerPhoneNumber">Buyer Phone Number</label>
+                <input type="text" className="form-control" id="buyerPhoneNumber" placeholder="Enter Buyer Phone Number" name="buyerPhoneNumber" value={buyer.phoneNumber} onChange={(e) => setSaleForm({ ...saleForm, buyer: { ...buyer, phoneNumber: e.target.value } })} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="buyerTinNumber">Buyer TIN Number</label>
+                <input type="text" className="form-control" id="buyerTinNumber" placeholder="Enter Buyer TIN Number" name="buyerTinNumber" value={buyer.tinNumber} onChange={(e) => setSaleForm({ ...saleForm, buyer: { ...buyer, tinNumber: e.target.value } })} />
+              </div>
+              <button type="submit" className="btn btn-primary">Add Sale</button>
+          </form>
+          <div id="printableArea" className='table-responsive'>
+            <br />
+          <h2>Added Sales</h2>
+          <table className="table table-striped table-hover caption-top" style={{fontSize: "12px"}}>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Buyer Name</th>
+                <th>Buyer Phone Number</th>
+                <th>Buyer Tin</th>
+                <th className="action-column">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {addedSales.map((sale, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>{sale.name}</td>
+                  <td>{sale.brand}</td>
+                  <td>{sale.category}</td>
+                  <td>{sale.singleSalePrice}</td>
+                  <td>{sale.quantity}</td>
+                  <td>{sale.singleSalePrice * sale.quantity}</td>
+                  <td>{sale.buyer.buyerName}</td>
+                  <td>{sale.buyer.phoneNumber}</td>
+                  <td>{sale.buyer.tinNumber}</td>
+                  <td className="action-column">
+                  <button className="btn btn-danger" style={{fontSize:"1.5rem"}} onClick={() => remove(index + 1)}>Remove</button>
+                  </td>
+                </tr>
+              ))}
+              <tr>
+            <td colSpan="6">Subtotal</td>
+            <td>{addedSales.reduce((sum, sale) => sum + sale.singleSalePrice * sale.quantity, 0)}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+            </tbody>
+          </table>
+          {/* <button className="btn btn-primary action-column" >Submit Sale</button> */}
+          {isLoading ? (
+          <ButtonLoading className="btn btn-lg btn-primary " type="submit" disabled>Loading...</ButtonLoading>
+            ) : (
+              <button className="btn btn-lg btn-primary" type="submit" onClick={submitSales}>Submit Sale</button>
+          )}
+
+          <ReactToPrint
+            trigger={() => <button className="btn btn-primary action-column">Print Added Sales</button>}
+            content={() => componentRef.current}/>
+          <ComponentToPrint ref={componentRef} addedSales={addedSales} />
+        </div>
+        </>
+        )}
+        {(showSales === "view sales") && (
+          <>
+          <ReactToPrint
+          trigger={() => (
+            <button className="btn btn-primary" onClick={handlePrint}>Print Table</button>
+          )}
+          content={() => componentRef.current}
+          onAfterPrint={() => setPrintView(false)}
+          onBeforeGetContent={handleBeforeGetContent}
+          />
+
+          <div style={{padding: "1.5rem"}}><h2>Sales</h2></div>
+          <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter}/>
+          <div className="table-responsive">
+          <div style={{margin: printView ? "50px" : null}} ref={componentRef}>
+          {printView && (
+        <>
+          <div style={{padding: "1.5rem"}}><h2>Sales</h2></div>
+          <div style={{marginBottom: '1rem', textAlign: "right", fontSize: "1.5rem"}}>Date: {new Date().toLocaleDateString()}</div>
+        </>
+      )}
+            <table className="table table-striped table-hover caption-top" {...getTableProps()} style={{fontSize: "12px"}}>
+            <thead>
+              {headerGroups.map(headerGroup => (
+                <tr {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map(column => (
+                    <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody {...getTableBodyProps()}>
+              {page.map(row => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()}>
+                    {row.cells.map(cell => (
+                      <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          </div>
+          </div>
+          <div>
+            <ul className="pagination justify-content-center pagination-lg">
+              <span style={{padding: "5px", fontSize: '15px'}}>
+              page{' '}
+              <strong>
+                <em style={{color: 'blue'}}>{pageIndex + 1}</em> of {pageOptions.length}
+              </strong>
+            </span>
+            <select className="form-select form-select-lg" style={{maxWidth: '90px'}}
+              value={pageSize}
+              onChange={e => {
+                setPageSize(Number(e.target.value))
+              }} >
+              {[10, 15, 20, 30, 40, 50, data.length].map((pageSize,index) => (
+                <option key={index} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </select>
+            <li>
+                <button className="page-link" onClick={() => gotoPage(0)} disabled={!canPreviousPage}>{'<<'}</button>
+              </li>
+              <li className={`page-item ${!canPreviousPage ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={previousPage} disabled={!canPreviousPage}>Previous</button>
+              </li>
+              <li className={`page-item ${!canNextPage ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={nextPage} disabled={!canNextPage}>Next</button>
+              </li>
+              <li>
+                <button className="page-link" onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>{'>>'}</button>
+              </li>
+            </ul>
+          </div>
+          </>
+        )}
+        {(showSales === "daily sales in cash") && (
+          <div >
+          
+          <DailySales paymentMethod="cash"/>
+          <br />
+          </div>
+        )}
+        {(showSales === "daily sales in bank") && (
+          <>
+          
+          <DailySales paymentMethod="bank" />
+          <br />
+          </>
+        )}
+        {(showSales === "view Products") && (
+          <>
+          <CumulativeProducts />
+          </>
+        )}
+        {/* <div className="table-style" style={{padding: "1.5rem"}}> */}
+      {/* </div> */}
+    </>
+  )
+}
