@@ -120,13 +120,13 @@ export const Signup = () => {
         {userType === "admin" ? 
         <div className="form-outline mb-4 form-floating">
           <input type="password" id="adminSecretKey" className="form-control form-control-lg" name="adminSecretKey" value={adminSecretKey} onChange={handleChange}/>
-          <label htmlFor="adminSecretKey">Admin Secret Key</label>
+          <label htmlFor="adminSecretKey">ADMIN@inventory</label>
         </div>
         : null}
         {userType === "employee" ? 
         <div className="form-outline mb-4 form-floating">
           <input type="password" id="employeeSecretKey" className="form-control form-control-lg" name="employeeSecretKey" value={employeeSecretKey} onChange={handleChange}/>
-          <label htmlFor="employeeSecretKey">Employee Secret Key</label>
+          <label htmlFor="employeeSecretKey">EMPLOYEE@inventory</label>
         </div>
         : null}
           {isLoading ? (
