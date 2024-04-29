@@ -11,7 +11,6 @@ import { useRedirectLogOutUser } from "../../../customHook/useRedirectLogOutUser
 const initialState = {
   name: "",
   category: "",
-  brand: "",
   singleSalePrice: "",
   quantity: "", 
   discription: "",
@@ -50,7 +49,7 @@ export const EditSale = () => {
   const { sale } = useSelector((state) => state.sale);
 
 
-  const {name, category, brand, singleSalePrice, quantity, discription, itemIdentification, buyerName, phoneNumber, tinNumber, paymentMethod, buyer, includeVAT} = saleForm;
+  const {name, category, singleSalePrice, quantity, discription, itemIdentification, buyerName, phoneNumber, tinNumber, paymentMethod, buyer, includeVAT} = saleForm;
   const seller = useSelector(selectName);
 
   // useEffect(() => {
@@ -67,7 +66,6 @@ export const EditSale = () => {
       setSaleForm({
         ...saleForm,
         name: product.name,
-        brand: product.brand,
         category: product.category.name,
         buyerName: buyer.buyerName,
         phoneNumber: buyer.phoneNumber,
@@ -97,7 +95,6 @@ export const EditSale = () => {
     const data = {
       name,
       category,
-      brand,
       singleSalePrice,
       quantity,
       seller,
@@ -117,7 +114,6 @@ export const EditSale = () => {
     return ProductsCumulative.filter(product => product.category.name === category);
   }, [category, ProductsCumulative]);
 
-  const uniqueBrands = [...new Set(filteredProducts.map(product => product.brand.toLowerCase()))];
 
 
 
@@ -144,26 +140,18 @@ export const EditSale = () => {
                 </select>
               </div>
             <div className="form-group">
-                <label htmlFor="category">Brand</label>
-                <select className="form-control form-select form-select-lg" name="brand" value={brand} onChange={handleInputChange} >
-                    <option value="">Select a Brand...</option>
-                    {uniqueBrands.map((brand) => (
-                      <option key={brand} value={brand}>{brand}</option>
-                    ))}
-                </select>
-              </div>
-            <div className="form-group">
               <label htmlFor="singleSalePrice">Selling Price</label>
               <input type="number" className="form-control" id="singleSalePrice" placeholder="Enter Single Sale Price" name="singleSalePrice" value={singleSalePrice} onChange={handleInputChange}/>
             </div>
             <div className="form-group">
-              <label className="form-label">  Include VAT</label>
-              <div className="form-check form-switch" style={{transform: "scale(1.5)"}}>
+              <label className="form-label">Include VAT</label>
+              <div className="form-check form-switch" style={{fontSize: "20px", paddingLeft: "0em"}}>
                 <input
                   className="form-check-input"
                   type="checkbox"
                   name="includeVAT"
                   checked={includeVAT}
+                  style={{marginLeft: "0.1px"}}
                   onChange={(e) => setSaleForm({ ...saleForm, includeVAT: e.target.checked })}
                 />
                 <label className="form-check-label">-Include VAT</label>

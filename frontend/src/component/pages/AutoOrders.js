@@ -49,10 +49,6 @@ export const AutoOrders = () => {
           accessor: 'name'
         },
         {
-          Header: 'Name Of Product',
-          accessor: 'brand'
-        },
-        {
           Header: 'Category',
           accessor: 'category.name',
         },

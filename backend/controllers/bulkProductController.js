@@ -16,7 +16,6 @@ const CreateBulkProduct = asyncHandler(async (req, res) => {
     const schema = Joi.object({
         name: Joi.string().required(),
         category: Joi.string().required(),
-        brand: Joi.string().required(),
         purchasedPrice: Joi.number().required(),
         minSellingPrice: Joi.number().required(),
         maxSellingPrice: Joi.number().required(),
@@ -33,8 +32,8 @@ const CreateBulkProduct = asyncHandler(async (req, res) => {
     const categoryMap = new Map(categories.map(c => [c.name, c._id]));
 
     const productsWithUserId = products.map(product => {
-        const { name, category, brand, purchasedPrice, minSellingPrice, maxSellingPrice, quantity, description, image, includeVAT } = product;
-        console.log(name, category, brand, purchasedPrice, minSellingPrice, maxSellingPrice, quantity, includeVAT)
+        const { name, category, purchasedPrice, minSellingPrice, maxSellingPrice, quantity, description, image, includeVAT } = product;
+        console.log(name, category, purchasedPrice, minSellingPrice, maxSellingPrice, quantity, includeVAT)
 
         // adjust the prices to include VAT
         const adjustedPurchasedPrice = includeVAT ? product.purchasedPrice / 1.15 : product.purchasedPrice;
@@ -74,12 +73,11 @@ const CreateBulkProduct = asyncHandler(async (req, res) => {
         await Promise.all(productsWithUserId.map(async (product) => {
             console.log(product);
             await CumulativeProducts.findOneAndUpdate(
-                { name: product.name, category: product.category, brand: product.brand,},
+                { name: product.name, category: product.category},
                 { 
                     $inc: { quantity: product.quantity, totalVATamount: product.VATamount }, // Increment quantity
                     name: product.name,
         category: product.category,
-        brand: product.brand,
         purchasedPrice: product.purchasedPrice,
         sellingPriceRange: {
             minSellingPrice: product.sellingPriceRange.minSellingPrice,

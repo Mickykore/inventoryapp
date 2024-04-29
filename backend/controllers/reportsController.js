@@ -40,7 +40,7 @@ const generateReport = async (startDate, endDate) => {
   const reportData = await Sale.find({ createdAt: { $gte: startOfDay, $lte: endOfDay } })
                   .populate({
                     path: 'product', // Populate the 'product' field
-                    select: 'name brand category purchasedPrice', // Select the fields you want to populate
+                    select: 'name  category purchasedPrice', // Select the fields you want to populate
                     populate: {
                         path: 'category', // Populate the 'category' field within the 'product'
                         select: 'name' // Select the 'name' field of the 'category'

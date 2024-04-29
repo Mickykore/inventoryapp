@@ -29,7 +29,6 @@ class ComponentToPrint extends React.Component {
 
 const initialState = {
   name: "",
-  brand: "",
   purchasedPrice: "",
   minSellingPrice: "",
   maxSellingPrice: "",
@@ -49,14 +48,14 @@ export const Products = () => {
   const [product, setProduct] = useState(initialState);
   const [addedProduct, setAddedProduct] = useState([]);
   const [printMode, setPrintMode] = useState(false);
-  const [showProduct, setShowProduct] = useState(false);
+  const [showProduct, setShowProduct] = useState("add product");
   const [isLoading, setIsLoading] = useState(false);
   const [printView, setPrintView] = useState(false);
 
   // const [allProducts, setAllProducts] = useState([{}]);
   // const [showAddProduct, setShowAddProduct] = useState(true);
 
-  const {name, brand, purchasedPrice, description, quantity, category, maxSellingPrice, minSellingPrice, includeVAT} = product;
+  const {name, purchasedPrice, description, quantity, category, maxSellingPrice, minSellingPrice, includeVAT} = product;
   const seller = useSelector(selectName);
   
   
@@ -79,13 +78,12 @@ export const Products = () => {
   const addProduct = (e) => {
     e.preventDefault();
 
-    if (!name || !brand || !purchasedPrice || !minSellingPrice || !maxSellingPrice || !category || !quantity) {
+    if (!name || !purchasedPrice || !minSellingPrice || !maxSellingPrice || !category || !quantity) {
       return toast.error("Please fill in all fieldsllll")
     }
    
     const data = {
       name,
-      brand,
       purchasedPrice,
       minSellingPrice,
       maxSellingPrice,
@@ -122,6 +120,7 @@ export const Products = () => {
 
   const delProduct= async(id) => {
     dispatch(deleteProduct(id));
+    dispatch(getProducts());
     // dispatch(getProducts());
     // setShowProduct(true);
   }
@@ -133,6 +132,7 @@ export const Products = () => {
 
   useEffect(() => {
     dispatch(getProducts());
+    dispatch(getallCategories());
   }, [dispatch, showProduct]);
 
   const ConfirmDelete = (id) => {
@@ -171,10 +171,6 @@ export const Products = () => {
       {
         Header: 'Name Of Product',
         accessor: 'name'
-      },
-      {
-        Header: 'Brand',
-        accessor: 'brand'
       },
       {
         Header: 'Category',
@@ -260,128 +256,124 @@ export const Products = () => {
   return (
     <div className="Orders">
       <div>
-        <h1>Products</h1>
         <div>
           <ul class="nav nav-pills">
             <li class="nav-item">
-            <button  className={showProduct ? 'nav-link' : 'nav-link disabled'} onClick={() => setShowProduct(false)}>Add Products</button>
+            <button  className={showProduct === "add product" ? 'nav-link disabled' : 'nav-link'} onClick={() => setShowProduct("add product")}>Add Products</button>
             </li>
             <li class="nav-item">
-            <button  className={showProduct ? 'nav-link disabled' : 'nav-link'} onClick={() => setShowProduct(true)}>Show Products</button>
+            <button  className={showProduct === "add bulk product" ? 'nav-link disabled' : 'nav-link' } onClick={() => setShowProduct("add bulk product")}>Add Bulk Products</button>
+            </li>
+            <li class="nav-item">
+            <button  className={showProduct === "products" ? 'nav-link disabled' : 'nav-link'} onClick={() => setShowProduct("products")}>Show Products</button>
             </li>
           </ul>
         </div>
-        {!showProduct && (
-        <>
-        <div>
+        {(showProduct === "add bulk product") && (
           <BulkProductForm />
-          <div id="hide-onprint" style={{padding: "1.5rem"}}><h2>Add Products</h2></div>
-          <form id="hide-onprint" onSubmit={addProduct} className="g-3 col-md-5" style={{fontSize: "1.5rem", padding: "1.5rem"}}>
-          <div>
-              <label htmlFor="category">Category</label>
-              <select className="form-control form-select form-select-lg" placeholder="Category Of The Product" name="category" value={category} onChange={handleInputChange} >
-                  <option value="">Select a category...</option>
-                  {categories.map((category) => (
-                    <option key={category.name} value={category.name}>{category.name}</option>
-                  ))}
-              </select>
+        )}
+        { showProduct === "add product" && (
+        <>
+          <div className="row">
+            <div className="col-md-2" style={{ width: "350px"}}>
+              <div id="hide-onprint" style={{ padding: "1.5rem" }}>
+                <h2>Add Products</h2>
+              </div>
+              <form id="hide-onprint" onSubmit={addProduct}  style={{ fontSize: "1.3rem", padding: "1.5rem"}}>
+                <div className="mb-2">
+                  <label htmlFor="category" className="form-label">Category</label>
+                  <select className="form-control form-select form-select-lg" placeholder="Category Of The Product" name="category" value={category} onChange={handleInputChange}>
+                    <option value="">Select a category...</option>
+                    {categories.map((category) => (
+                      <option key={category.name} value={category.name}>{category.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mb-0">
+                  <label htmlFor="name" className="form-label">Name</label>
+                  <input className="form-control" placeholder="Name Of The Product" type="text" name="name" value={name} onChange={handleInputChange} />
+                </div>
+                <div className="mb-0">
+                  <label htmlFor="purchasedPrice" className="form-label">Purchased Price</label>
+                  <input className="form-control" type="number" min="1" required placeholder="Price Of The Product" name="purchasedPrice" value={purchasedPrice} onChange={handleInputChange} />
+                </div>
+                <div className="mb-0 form-check form-switch" style={{ fontSize: "20px" }}>
+                  <input className="form-check-input" type="checkbox" name="includeVAT" checked={includeVAT} style={{ marginLeft: "0.1px" }} onChange={(e) => setProduct({ ...product, includeVAT: e.target.checked })} />
+                  <label className="form-check-label">-Include VAT</label>
+                </div>
+                <div className="mb-0">
+                  <label htmlFor="minSellingPrice" className="form-label">Minimum Selling Price</label>
+                  <input className="form-control" type="number" min="1" required placeholder="Minimum Selling Price" name="minSellingPrice" value={minSellingPrice} onChange={handleInputChange} />
+                </div>
+                <div className="mb-0">
+                  <label htmlFor="maxSellingPrice" className="form-label">Maximum Selling Price</label>
+                  <input className="form-control" type="number" min="1" required placeholder="Maximum Selling Price" name="maxSellingPrice" value={maxSellingPrice} onChange={handleInputChange} />
+                </div>
+                <div className="mb-0">
+                  <label htmlFor="quantity" className="form-label">Quantity</label>
+                  <input className="form-control" type="number" min="1" required placeholder="Quantity Of The Product" name="quantity" value={quantity} onChange={handleInputChange} />
+                </div>
+                <div className="mb-0">
+                  <label htmlFor="description" className="form-label">Description</label>
+                  <textarea type="text" name="description" value={description} onChange={handleInputChange} className="form-control" />
+                </div>
+                <div>
+                  <button type="submit" className="btn btn-primary">Submit</button>
+                </div>
+              </form>
             </div>
-            <div>
-              <label className="form-label">Name</label>
-              <input className="form-control" placeholder="Name Of The Product" type="text" name="name" value={name} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label className="form-label">Brand</label>
-              <input className="form-control" placeholder="Brand Of The Product" type="text" name="brand" value={brand} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label className="form-label">purchasedPrice</label>
-              <input className="form-control" type="number" min="1" required placeholder="Price Of The Product" name="purchasedPrice" value={purchasedPrice} onChange={handleInputChange} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">  Include VAT</label>
-              <div className="form-check form-switch" style={{fontSize: "20px"}}>
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="includeVAT"
-                  checked={includeVAT}
-                  style={{marginLeft: "0.1px"}}
-                  onChange={(e) => setProduct({ ...product, includeVAT: e.target.checked })}
-                />
-                <label className="form-check-label">-Include VAT</label>
+            <div className="col-md-8">
+              <div id="printableArea" className='table-responsive' >
+                <br />
+                <div id="hide-onprint" style={{ padding: "1.5rem" }}>
+                <h2>Added Products</h2>
+              </div>
+                <table className="table table-striped table-hover caption-top" style={{ fontSize: "12px", width: "100%" }}>
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Quantity</th>
+                      <th>Total</th>
+                      <th className="action-column">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {addedProduct.map((product, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{product.name}</td>
+                        <td>{product.category}</td>
+                        <td>{product.purchasedPrice}</td>
+                        <td>{product.quantity}</td>
+                        <td>{product.purchasedPrice * product.quantity}</td>
+                        <td className="action-column">
+                          <button className="btn btn-danger" style={{ fontSize: "1.5rem" }} onClick={() => remove(index + 1)}>Remove</button>
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td colSpan="5">Subtotal</td>
+                      <td>{addedProduct.reduce((sum, product) => sum + product.purchasedPrice * product.quantity, 0)}</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+                {isLoading ? (
+                  <ButtonLoading className="btn btn-lg btn-primary " type="submit" disabled>Loading...</ButtonLoading>
+                ) : (
+                  <button className="btn btn-lg btn-primary" type="submit" onClick={submitProduct}>Submit Product</button>
+                )}
               </div>
             </div>
-            <div>
-              <label className="form-label">minSellingPrice</label>
-              <input className="form-control" type="number" min="1" required placeholder="Minimum Selling Price" name="minSellingPrice" value={minSellingPrice} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label className="form-label">maxSellingPrice</label>
-              <input className="form-control" type="number" min="1" required placeholder="Maximum Selling Price" name="maxSellingPrice" value={maxSellingPrice} onChange={handleInputChange} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Quantity</label>
-              <input className="form-control" type="number" min="1" required placeholder="Quantity Of The Product" name="quantity" value={quantity} onChange={handleInputChange} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Description</label>
-              <textarea type="text" name="description" value={description} onChange={handleInputChange} className="form-control"/>
-            </div>
-            <div>
-            <button type="submit" className="btn btn-primary">Submit</button>
-            </div>
-          </form>
-        </div>
-        <div id="printableArea" className='table-responsive'>
-          <br />
-          <h2>Added Products</h2>
-          <table className="table table-striped table-hover caption-top" style={{fontSize: "12px"}}>
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Name</th>
-                <th>Brand</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Total</th>
-                <th className="action-column">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {addedProduct.map((product, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{product.name}</td>
-                  <td>{product.brand}</td>
-                  <td>{product.category}</td>
-                  <td>{product.purchasedPrice}</td>
-                  <td>{product.quantity}</td>
-                  <td>{product.purchasedPrice * product.quantity}</td>
-                  <td className="action-column">
-                  <button className="btn btn-danger" style={{fontSize:"1.5rem"}} onClick={() => remove(index + 1)}>Remove</button>
-                  </td>
-                </tr>
-              ))}
-              <tr>
-            <td colSpan="6">Subtotal</td>
-            <td>{addedProduct.reduce((sum, product) => sum + product.purchasedPrice * product.quantity, 0)}</td>
-            <td></td>
-        </tr>
-            </tbody>
-          </table>
-          {/* <button className="btn btn-primary action-column" onClick={submitProduct}>Submit Product</button> */}
-          {isLoading ? (
-          <ButtonLoading className="btn btn-lg btn-primary " type="submit" disabled>Loading...</ButtonLoading>
-            ) : (
-              <button className="btn btn-lg btn-primary" type="submit" onClick={submitProduct}>Submit Product</button>
-          )}
-        </div>
+          </div>
         </>
+      
         )}
         {/* <div id="hide-onprint" className="table-style" style={{padding: "1.5rem"}}> */}
-        { showProduct && ( 
+        { (showProduct === "products") && ( 
         <>
           <ReactToPrint
             trigger={() => (

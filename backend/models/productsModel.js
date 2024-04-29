@@ -8,7 +8,6 @@ const categorySchema = new mongoose.Schema({
 const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     image: { type: Object, default: {} },
-    brand: { type: String, required: true },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
@@ -37,7 +36,6 @@ const productSchema = new mongoose.Schema({
 const cumulativeProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
     image: { type: Object, default: {} },
-    brand: { type: String, required: true },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',

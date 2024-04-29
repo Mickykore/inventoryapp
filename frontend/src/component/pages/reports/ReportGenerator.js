@@ -46,10 +46,6 @@ const ReportGenerator = ({startDate, endDate, timeframe}) => {
       accessor: 'product.name'
     },
     {
-      Header: 'Brand',
-      accessor: 'product.brand'
-    },
-    {
       Header: 'Category',
       accessor: 'product.category.name',
     },

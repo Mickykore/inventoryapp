@@ -15,7 +15,6 @@ import ReactToPrint from 'react-to-print';
 
 const initialState = {
   name: "",
-  brand: "",
   orderer: "",
   quantity: "",
   category: "",
@@ -38,7 +37,7 @@ export const Orders = () => {
   const [printView, setPrintView] = useState(false);
 
 
-  const {name, brand, orderer, description, quantity, category, phoneNumber} = order;
+  const {name, orderer, description, quantity, category, phoneNumber} = order;
   // const seller = useSelector(selectName);
   
   
@@ -59,13 +58,12 @@ export const Orders = () => {
 
   const addOrder = (e) => {
     e.preventDefault();
-    if (!name || !brand || !orderer || !category || !quantity || !description || !phoneNumber) {
+    if (!name || !orderer || !category || !quantity || !description || !phoneNumber) {
       return toast.error("Please fill in all fieldsll")
     }
     
     const data = {
       name,
-      brand,
       orderer,
       description,
       category,
@@ -134,10 +132,6 @@ export const Orders = () => {
       {
         Header: 'Ordered item',
         accessor: 'name'
-      },
-      {
-        Header: 'Brand',
-        accessor: 'brand'
       },
       {
         Header: 'Category',
@@ -217,7 +211,6 @@ export const Orders = () => {
   return (
     <div className="Orders">
       <div>
-        <h1>orders</h1>
         <ul class="nav nav-pills">
             <li class="nav-item">
             <button  className={showOrder ? 'nav-link' : 'nav-link disabled'} onClick={() => setShowOrder(false)}>Add Orders</button>
@@ -228,84 +221,83 @@ export const Orders = () => {
           </ul>
         {!showOrder && (
         <>
-        <div>
-        <div style={{padding: "1.5rem"}}><h2>Add Orders</h2></div>
-          <form onSubmit={addOrder} className="g-3 col-md-5" style={{fontSize: "1.5rem", padding: "1.5rem"}}>
-            <div>
-              <label className="form-label">Name</label>
-              <input className="form-control" placeholder="Ordered item" type="text" name="name" value={name} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label className="form-label">Brand</label>
-              <input className="form-control" placeholder="Brand" type="text" name="brand" value={brand} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label htmlFor="category">Category</label>
-              <input className="form-control" placeholder="Category" type="text" name="category" value={category} onChange={handleInputChange} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Quantity</label>
-              <input className="form-control" type="number" placeholder="Quantity" name="quantity" value={quantity} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label className="form-label">order By</label>
-              <input className="form-control" type="name" placeholder="Order By" name="orderer" value={orderer} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label className="form-label">Phone Number</label>
-              <input className="form-control" type="text" placeholder="Phone number" name="phoneNumber" value={phoneNumber} onChange={handleInputChange} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Description</label>
-              <textarea type="text" name="description" value={description} onChange={handleInputChange} className="form-control"/>
-            </div>
-            <div>
-            <button type="submit" className="btn btn-primary">Submit</button>
-            </div>
-          </form>
-        </div>
-        <div id="printableArea" className='table-responsive'>
-          <h2>Added Products</h2>
-          <table className="table table-striped table-hover caption-top" style={{fontSize: "12px"}}>
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Name</th>
-                <th>Brand</th>
-                <th>Category</th>
-                <th>Quantity</th>
-                <th>Order By</th>
-                <th>Phone Number</th>
-                <th className="action-column">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {addedOrder.map((order, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{order.name}</td>
-                  <td>{order.brand}</td>
-                  <td>{order.category}</td>
-                  <td>{order.quantity}</td>
-                  <td>{order.orderer}</td>
-                  <td>{order.phoneNumber}</td>
-                  <td className="action-column">
-                    <button className="btn btn-danger" style={{fontSize:"1.5rem"}} onClick={() => remove(index + 1)}>Remove</button>
-                  </td>
+        <div className='row'>
+          <div className='col-md-2' style={{ width: "300px"}}>
+            <div style={{padding: "1.5rem"}}><h2>Add Orders</h2></div>
+            <form onSubmit={addOrder} style={{fontSize: "1.5rem", padding: "1.5rem"}}>
+              <div>
+                <label className="form-label">Name</label>
+                <input className="form-control" placeholder="Ordered item" type="text" name="name" value={name} onChange={handleInputChange} />
+              </div>
+              <div>
+                <label htmlFor="category">Category</label>
+                <input className="form-control" placeholder="Category" type="text" name="category" value={category} onChange={handleInputChange} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Quantity</label>
+                <input className="form-control" type="number" placeholder="Quantity" name="quantity" value={quantity} onChange={handleInputChange} />
+              </div>
+              <div>
+                <label className="form-label">order By</label>
+                <input className="form-control" type="name" placeholder="Order By" name="orderer" value={orderer} onChange={handleInputChange} />
+              </div>
+              <div>
+                <label className="form-label">Phone Number</label>
+                <input className="form-control" type="text" placeholder="Phone number" name="phoneNumber" value={phoneNumber} onChange={handleInputChange} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Description</label>
+                <textarea type="text" name="description" value={description} onChange={handleInputChange} className="form-control"/>
+              </div>
+              <div>
+              <button type="submit" className="btn btn-primary">Submit</button>
+              </div>
+            </form>
+            
+          </div>
+          <div className='col-md-8'>
+          <div id="printableArea" className='table-responsive'>
+          <div style={{padding: "1.5rem"}}><h2>Added Orders</h2></div>
+            <table className="table table-striped table-hover caption-top" style={{fontSize: "12px"}}>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Quantity</th>
+                  <th>Order By</th>
+                  <th>Phone Number</th>
+                  <th className="action-column">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {/* <button className="btn btn-primary action-column" onClick={submitOrder}>Submit Product</button> */}
-          {isLoading ? (
-          <ButtonLoading className="btn btn-lg btn-primary " type="submit" disabled>Loading...</ButtonLoading>
-            ) : (
-              <button className="btn btn-lg btn-primary" type="submit" onClick={submitOrder}>Submit Order</button>
-          )}
-          {/* <ReactToPrint
-            trigger={() => <button className="btn btn-primary action-column">Print Added Products</button>}
-            content={() => componentRef.current}/>
-          <ComponentToPrint ref={componentRef} addedProduct={addedProduct} /> */}
+              </thead>
+              <tbody>
+                {addedOrder.map((order, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{order.name}</td>
+                    <td>{order.category}</td>
+                    <td>{order.quantity}</td>
+                    <td>{order.orderer}</td>
+                    <td>{order.phoneNumber}</td>
+                    <td className="action-column">
+                      <button className="btn btn-danger" style={{fontSize:"1.5rem"}} onClick={() => remove(index + 1)}>Remove</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* <button className="btn btn-primary action-column" onClick={submitOrder}>Submit Product</button> */}
+            {isLoading ? (
+            <ButtonLoading className="btn btn-lg btn-primary " type="submit" disabled>Loading...</ButtonLoading>
+              ) : (
+                <button className="btn btn-lg btn-primary" type="submit" onClick={submitOrder}>Submit Order</button>
+            )}
+            {/* <ReactToPrint
+              trigger={() => <button className="btn btn-primary action-column">Print Added Products</button>}
+              content={() => componentRef.current}/>
+            <ComponentToPrint ref={componentRef} addedProduct={addedProduct} /> */}
+          </div>
+          </div>
         </div>
         </>
         )}
@@ -389,10 +381,6 @@ export const Orders = () => {
       </div>
         </>
         )}
-      </div>
-      <div>
-      <h2>Auto Orders</h2>
-      <AutoOrders />
       </div>
     </div>
   )

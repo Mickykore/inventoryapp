@@ -16,7 +16,7 @@ const CreateSales = asyncHandler(async (req, res) => {
     req.body.singleSalePrice = parseFloat(req.body.singleSalePrice);
     req.body.quantity = parseFloat(req.body.quantity);
 
-    const { name, category, brand, singleSalePrice, quantity, seller, description, buyer, paymentMethod, itemIdentification, includeVAT } = req.body;
+    const { name, category, singleSalePrice, quantity, seller, description, buyer, paymentMethod, itemIdentification, includeVAT } = req.body;
 
 
     let adjustedSalePrice = singleSalePrice;
@@ -33,7 +33,7 @@ const CreateSales = asyncHandler(async (req, res) => {
         throw new Error('Invalid user ID');
     }
     // Validate data
-    if (!name || !brand || !singleSalePrice || !quantity || !category || !buyer || !paymentMethod) {
+    if (!name || !singleSalePrice || !quantity || !category || !paymentMethod) {
         res.status(400);
         throw new Error('Please fill all fields');
     }
@@ -43,13 +43,16 @@ const CreateSales = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Invalid category');
     }
+    console.log(saleCategory, "saleCategory");
+    console.log(name, "name");
 
     // Check if the product exists to sell
     const existingProduct = await CumulativeProducts.findOne({
-        name: new RegExp(`${name}`, 'i'),
-        brand: new RegExp(`${brand}`, 'i'),
+        name, //i cant use no case sensitive
         category: saleCategory._id,
     });
+
+    console.log(existingProduct, "existingProduct");
 
     if (!existingProduct) {
         res.status(400);
@@ -138,7 +141,7 @@ const getsales = asyncHandler(async (req, res) => {
     const sales = await Sale.find({}).sort({ createdAt: -1 })
         .populate({
             path: 'product',
-            select: 'name brand category',
+            select: 'name category',
             populate: {
                 path: 'category',
                 select: 'name'
@@ -154,7 +157,7 @@ const getCumulativesales = asyncHandler(async (req, res) => {
     const sales = await Cumulativesales.find({}).sort({ createdAt: -1 })
         .populate({
             path: 'product',
-            select: 'name brand category',
+            select: 'name category',
             populate: {
                 path: 'category',
                 select: 'name'
@@ -173,7 +176,7 @@ const getsaleById = asyncHandler(async (req, res) => {
     const sale = await Sale.findById(req.params.id)
         .populate({
             path: 'product',
-            select: 'name brand category',
+            select: 'name category',
             populate: {
                 path: 'category',
                 select: 'name'
@@ -267,7 +270,7 @@ const Updatesale = asyncHandler(async (req, res) => {
     req.body.singleSalePrice = parseFloat(req.body.singleSalePrice);
     req.body.quantity = parseFloat(req.body.quantity);
 
-    const { name, category, brand, singleSalePrice, quantity, seller, description, buyer, paymentMethod, itemIdentification, includeVAT } = req.body;
+    const { name, category, singleSalePrice, quantity, seller, description, buyer, paymentMethod, itemIdentification, includeVAT } = req.body;
 
 
 
@@ -302,8 +305,7 @@ const Updatesale = asyncHandler(async (req, res) => {
 
     const existingProduct = await CumulativeProducts.findOne({
         name: new RegExp(`${name}`, 'i'),
-        brand: new RegExp(`${brand}`, 'i'),
-        category: saleCategory._id
+        category: saleCategory._id,
     });
 
     if (!existingProduct) {
@@ -366,7 +368,7 @@ const Updatesale = asyncHandler(async (req, res) => {
     }, { new: true, upsert: true, setDefaultsOnInsert: true })
         .populate({
             path: 'product',
-            select: 'name brand category',
+            select: 'name category',
             populate: {
                 path: 'category',
                 select: 'name'

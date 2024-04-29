@@ -33,7 +33,7 @@ const BulkProductForm = () => {
             const data = XLSX.utils.sheet_to_json(ws);
 
             // Define the necessary fields
-            const necessaryFields = ['name', 'category', 'brand', 'purchasedPrice', 'minSellingPrice', 'maxSellingPrice', 'quantity'];
+            const necessaryFields = ['name', 'category', 'purchasedPrice', 'minSellingPrice', 'maxSellingPrice', 'quantity'];
 
             // Check if all necessary fields are included in the first row of the data
             const dataFields = Object.keys(data[0]);

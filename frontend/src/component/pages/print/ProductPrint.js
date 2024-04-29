@@ -15,10 +15,6 @@ export const ProductPrint = ({Products}) => {
           accessor: 'name'
         },
         {
-          Header: 'Name Of Product',
-          accessor: 'brand'
-        },
-        {
           Header: 'Category',
           accessor: 'category.name',
         },

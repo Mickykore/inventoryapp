@@ -7,7 +7,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 const initialState = {
   name: "",
-  brand: "",
   orderer: "",
   quantity: "",
   category: "",
@@ -26,7 +25,7 @@ export const EditOrder = () => {
 
   const [orderForm, setOrderForm] = useState(initialState);
 
-  const {name, brand, orderer, description, quantity, category, phoneNumber} = orderForm;
+  const {name, orderer, description, quantity, category, phoneNumber} = orderForm;
 
   useEffect(() => {
     dispatch(getSingleOrder(id));
@@ -55,14 +54,13 @@ export const EditOrder = () => {
 
   const editOrder = (e) => {
     e.preventDefault();
-    if (!name || !brand || !orderer || !category || !quantity || !phoneNumber) {
+    if (!name || !orderer || !category || !quantity || !phoneNumber) {
       return toast.error("Please fill in all fieldsll")
     }
     
    
     const data = {
       name,
-      brand,
       orderer,
       description,
       category,
@@ -83,10 +81,6 @@ export const EditOrder = () => {
             <div>
               <label className="form-label">Name</label>
               <input className="form-control" placeholder="Ordered item" type="text" name="name" value={name} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label className="form-label">Brand</label>
-              <input className="form-control" placeholder="Brand" type="text" name="brand" value={brand} onChange={handleInputChange} />
             </div>
             <div>
               <label htmlFor="category">Category</label>

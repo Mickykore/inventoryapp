@@ -9,7 +9,6 @@ import { useRedirectLogOutUser } from "../../../customHook/useRedirectLogOutUser
 
 const initialState = {
   name: "",
-  brand: "",
   purchasedPrice: "",
   minSellingPrice: "",
   maxSellingPrice: "",
@@ -37,7 +36,7 @@ export const EditProduct = () => {
   const categories = useSelector((state) => state.category.categories);
 
 
-  const {name, brand, purchasedPrice, description, quantity, category, maxSellingPrice, minSellingPrice, sellingPriceRange, includeVAT} = productForm;
+  const {name, purchasedPrice, description, quantity, category, maxSellingPrice, minSellingPrice, sellingPriceRange, includeVAT} = productForm;
   
 
   useEffect(() => {
@@ -65,13 +64,12 @@ export const EditProduct = () => {
   const editProduct = (e) => {
     e.preventDefault();
 
-    if (!name || !brand || !purchasedPrice || !minSellingPrice || !maxSellingPrice || !category || !quantity) {
+    if (!name || !purchasedPrice || !minSellingPrice || !maxSellingPrice || !category || !quantity) {
       return toast.error("Please fill in all fieldsllll")
     }
    
     const data = {
       name,
-      brand,
       purchasedPrice,
       minSellingPrice,
       maxSellingPrice,
@@ -113,21 +111,18 @@ export const EditProduct = () => {
               <input className="form-control" placeholder="Name Of The Product" type="text" name="name" value={name} onChange={handleInputChange} />
             </div>
             <div>
-              <label className="form-label">Brand</label>
-              <input className="form-control" placeholder="Brand Of The Product" type="text" name="brand" value={brand} onChange={handleInputChange} />
-            </div>
-            <div>
               <label className="form-label">purchasedPrice</label>
               <input className="form-control" type="number" placeholder="Price Of The Product" name="purchasedPrice" value={purchasedPrice} onChange={handleInputChange} />
             </div>
             <div className="form-group">
-              <label className="form-label">  Include VAT</label>
-              <div className="form-check form-switch" style={{transform: "scale(1.5)"}}>
+              <label className="form-label">Include VAT</label>
+              <div className="form-check form-switch" style={{fontSize: "20px", paddingLeft: "0em"}}>
                 <input
                   className="form-check-input"
                   type="checkbox"
                   name="includeVAT"
                   checked={includeVAT}
+                  style={{marginLeft: "0.1px"}}
                   onChange={(e) => setProductForm({ ...productForm, includeVAT: e.target.checked })}
                 />
                 <label className="form-check-label">-Include VAT</label>

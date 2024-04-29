@@ -7,6 +7,7 @@ import './Home.scss';
 import report from "../../../assets/reports.png";
 import order from "../../../assets/order.png";
 import products from "../../../assets/products.png";
+import Pay from "../Pay";
 
 
 const Home = () => {
@@ -40,6 +41,9 @@ const Home = () => {
 
         <hr className="featurette-divider" />
       </div>
+      </div>
+      <div className="container">
+        <Pay />
       </div>
       <LandingFooter />
     </>

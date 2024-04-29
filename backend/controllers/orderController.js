@@ -12,12 +12,12 @@ cloudinary.config({
 
 const createOrder = async (req, res) => {
   try {
-    const {name, category, brand, quantity, orderer, phoneNumber, description, image} = req.body;
+    const {name, category, quantity, orderer, phoneNumber, description, image} = req.body;
     const userId = req.user._id;
     //vallidate data
     console.log("ok order");
 
-    if (!name || !category || !brand || !orderer || !phoneNumber || !quantity) {
+    if (!name || !category || !orderer || !phoneNumber || !quantity) {
         res.status(400).json({message: 'Please fill all fields'});
         return;
     }
@@ -50,7 +50,6 @@ const createOrder = async (req, res) => {
     const order = await Order.create({
         name,
         category,
-        brand,
         quantity,
         orderBy: {
             name:orderer,
@@ -117,7 +116,7 @@ const updateOrder = asyncHandler(async (req, res) => {
         throw new Error('Invalid product ID');
     }
 
-    const {name, category, brand, quantity, orderer, phoneNumber, description, image} = req.body;
+    const {name, category, quantity, orderer, phoneNumber, description, image} = req.body;
     const order = await Order.findById(req.params.id); 
     //vallidate data
     if (!order) {
@@ -153,7 +152,6 @@ const updateOrder = asyncHandler(async (req, res) => {
     const updatedOrder = await Order.findByIdAndUpdate({_id: req.params.id}, {
         name,
         category,
-        brand,
         quantity,
         orderBy: {
             name: orderer,

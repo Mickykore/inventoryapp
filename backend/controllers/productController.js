@@ -61,6 +61,12 @@ const UpdateCategory = asyncHandler(async (req, res) => {
     }
     const category = await Category.findById(req.params.id);
 
+    const existingCategory = await Category.findOne({name: req.body.name});
+    if (existingCategory) {
+        res.status(400);
+        throw new Error('Category already exists');
+    }
+
     if (category) {
         category.name = req.body.name || category.name;
         const updatedCategory = await category.save();
@@ -73,7 +79,6 @@ const UpdateCategory = asyncHandler(async (req, res) => {
 
 // delete category
 const deleteCategory = asyncHandler(async (req, res) => {
-    try {
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
         res.status(400);
@@ -82,6 +87,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
 
     const category = await Category.findById(req.params.id);
     const product = await Product.findOne({category: category._id});
+
     if (product) {
         res.status(400);
         throw new Error('Category has products, cannot delete');
@@ -93,10 +99,6 @@ const deleteCategory = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Category not found');
     }
-} catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
-}
 });
 
 const getCategoryById = asyncHandler(async (req, res) => {
@@ -126,7 +128,7 @@ const CreateProduct = asyncHandler(async (req, res) => {
     req.body.maxSellingPrice = parseFloat(req.body.maxSellingPrice);
     req.body.quantity = parseInt(req.body.quantity);
 
-    const {name, category, brand, purchasedPrice, minSellingPrice, maxSellingPrice, quantity, addedBy, description, image, includeVAT} = req.body;
+    const {name, category,  purchasedPrice, minSellingPrice, maxSellingPrice, quantity, addedBy, description, image, includeVAT} = req.body;
 
 
     // Calculate adjusted purchased price and VAT amount
@@ -138,7 +140,7 @@ const CreateProduct = asyncHandler(async (req, res) => {
     }
 
     //vallidate data
-    if (!name || !brand || !purchasedPrice || !quantity || !minSellingPrice || !maxSellingPrice || !category ) {
+    if (!name || !purchasedPrice || !quantity || !minSellingPrice || !maxSellingPrice || !category ) {
         res.status(400);
         throw new Error('Please fill all fields');
     }
@@ -180,7 +182,7 @@ const CreateProduct = asyncHandler(async (req, res) => {
 
     //check if category exists
 
-    const productCategory = await Category.findOne({name: new RegExp(category, 'i')});
+    const productCategory = await Category.findOne({name: category});
     if (!productCategory) {
         res.status(400);
         throw new Error('Invalid category');
@@ -190,7 +192,7 @@ const CreateProduct = asyncHandler(async (req, res) => {
     const product = await Product.create({
         name,
         category: productCategory._id,
-        brand,
+        
         purchasedPrice: adjustedPurchasedPrice,
         sellingPriceRange: {
             minSellingPrice,
@@ -211,14 +213,12 @@ const CreateProduct = asyncHandler(async (req, res) => {
     // Create or update product in CumulativeProduct collection
     const cumulativeProduct = await CumulativeProducts.findOneAndUpdate(
         { 
-            name: new RegExp(`${product.name}`, 'i'), 
-            category: productCategory._id, 
-            brand: new RegExp(`${product.brand}`, 'i') }, // find
+            name: product.name, 
+            category: productCategory._id, }, // find
         { 
         $inc: { quantity: quantity, totalVATamount: VATamount }, // Increment quantity
         name: product.name,
         category: product.category,
-        brand: product.brand,
         purchasedPrice: product.purchasedPrice,
         sellingPriceRange: {
             minSellingPrice: product.sellingPriceRange.minSellingPrice,
@@ -282,49 +282,72 @@ const getProductById = asyncHandler(async (req, res) => {
 });
 
 const deleteProduct = asyncHandler(async (req, res) => {
-    const sessionId = await mongoose.startSession();
     try {
-      const session = await sessionId.startTransaction();
-  
-      const product = await Product.findById(req.params.id).session(session);
+      const product = await Product.findById(req.params.id);
       if (!product) {
-        await session.abortTransaction();
         return res.status(404).json({ message: 'Product not found' });
       }
-
-      let cumulativeProduct = await CumulativeProducts.findOne({name: product.name, category: product.category, brand: product.brand}).session(session);
-      const sale = await Cumulativesales.findOne({ product: cumulativeProduct._id }).session(session);
+  
+      let cumulativeProduct = await CumulativeProducts.findOne({ name: product.name, category: product.category });
+      const sale = await Cumulativesales.findOne({ product: cumulativeProduct._id });
+      console.log(sale);
       if (sale) {
         const cumulativeProductQuantity = cumulativeProduct.quantity;
         const saleQuantity = sale.quantity;
         const ProductQuantity = product.quantity;
-
+  
         if ((cumulativeProductQuantity - ProductQuantity) < saleQuantity) {
-          await session.abortTransaction();
           return res.status(400).json({ message: 'Product has been sold out, you can\'t this product' });
         }
       }
   
+  
       cumulativeProduct = await CumulativeProducts.findOneAndUpdate(
-        { name: product.name, category: product.category, brand: product.brand },
+        { name: product.name, category: product.category },
         { $inc: { quantity: -product.quantity, totalVATamount: -product.VATamount } },
-        { new: true, session }
+        { new: true }
       );
   
-      
   
-      await product.deleteOne({ session });
-      await session.commitTransaction();
+      await product.deleteOne();
+      console.log("pro",product);
+
+      const productAfter = await Product.findOne({ name: product.name, category: product.category });
+      const cumulativeProductAfter = await CumulativeProducts.findOne({ name: product.name, category: product.category });
+  
+      if (!productAfter && cumulativeProductAfter && (cumulativeProductAfter.quantity === 0)) {
+        await cumulativeProductAfter.deleteOne();
+      }
   
       res.json(product);
     } catch (error) {
       console.error(error);
-      await sessionId.abortTransaction();
       res.status(500).json({ message: 'Error deleting product' });
-    } finally {
-      sessionId.endSession();
     }
   });
+  
+
+const deleteCumulativeProduct = asyncHandler(async (req, res) => {
+
+try {
+    console.log(req.params.id);
+    const cumulativeproduct = await CumulativeProducts.findById(req.params.id);
+    console.log(cumulativeproduct);
+    if (!cumulativeproduct) {
+    res.status(404).json({ message: 'Product not found' });
+    }
+    // if(cumulativeproduct.quantity <= 0) {
+    //     await cumulativeproduct.deleteOne();
+    // } else {
+    //     res.status(400).json({ message: 'Product quantity is more than 0 can not be deleted' });
+    // }
+    await cumulativeproduct.deleteOne();
+    res.status(500).json({ message: 'Cumulative Product deleted successfully' });
+} catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting product' });
+}
+});
   
 
 // update product
@@ -343,7 +366,12 @@ const UpdateProduct = asyncHandler(async (req, res) => {
     req.body.maxSellingPrice = parseFloat(req.body.maxSellingPrice);
     req.body.quantity = parseInt(req.body.quantity);
 
-    const {name, category, brand, purchasedPrice, minSellingPrice, maxSellingPrice, quantity, addedBy, description, image, includeVAT} = req.body;
+    const {name, category,  purchasedPrice, minSellingPrice, maxSellingPrice, quantity, addedBy, description, image, includeVAT} = req.body;
+
+    if (!name || !purchasedPrice || !quantity || !minSellingPrice || !maxSellingPrice || !category ) {
+        res.status(400);
+        throw new Error('Please fill all fields');
+    }
 
     const product = await Product.findById(req.params.id);
 
@@ -376,8 +404,9 @@ const UpdateProduct = asyncHandler(async (req, res) => {
         throw new Error('Product not found');
     }
 
-    let cumulativeProductBefore = await CumulativeProducts.findOne({name: product.name, category: product.category, brand: product.brand});
-
+    let cumulativeProductBefore = await CumulativeProducts.findOne({name: product.name, category: product.category});
+    
+    if(cumulativeProductBefore) {
     const sale = await Cumulativesales.findOne({ product: cumulativeProductBefore._id });
 
     if (sale) {
@@ -393,14 +422,19 @@ const UpdateProduct = asyncHandler(async (req, res) => {
             }
         }
     }
+    }
 
 
     // if the user updates the product first i should delete it from the cumulative products
     cumulativeProductBefore = await CumulativeProducts.findOneAndUpdate(
-        { name: product.name, category: product.category, brand: product.brand }, // find
+        { name: product.name, category: product.category }, // find
         { $inc: { quantity: -product.quantity, totalVATamount: -product.VATamount } }, // update
         { new: true, upsert: false, setDefaultsOnInsert: true } // options
     );
+
+    
+
+    
 
 
      // Handle Image upload
@@ -426,7 +460,7 @@ const UpdateProduct = asyncHandler(async (req, res) => {
     };
   }
 
-  const productCategory = await Category.findOne({name: new RegExp(category, 'i')});
+  const productCategory = await Category.findOne({name: category});
   if (!productCategory) {
       res.status(400);
       throw new Error('Invalid category');
@@ -436,7 +470,7 @@ const UpdateProduct = asyncHandler(async (req, res) => {
     const updatedProduct = await Product.findByIdAndUpdate({_id: req.params.id}, {
         name,
         category: productCategory._id,
-        brand,
+        
         purchasedPrice: adjustedPurchasedPrice,
         sellingPriceRange: {
             minSellingPrice,
@@ -455,9 +489,8 @@ const UpdateProduct = asyncHandler(async (req, res) => {
     // after updating the product i should update the cumulative products
     const cumulativeProduct = await CumulativeProducts.findOneAndUpdate(
         { 
-            name: new RegExp(updatedProduct.name, 'i'), 
+            name: updatedProduct.name, 
             category: updatedProduct.category, 
-            brand:  new RegExp(updatedProduct.brand, 'i')
         }, // Filter
         { 
             $inc: { 
@@ -465,6 +498,8 @@ const UpdateProduct = asyncHandler(async (req, res) => {
                 totalVATamount: updatedProduct.VATamount,
             },
             $set: {
+                name: updatedProduct.name,
+                category: updatedProduct.category,
                 purchasedPrice: updatedProduct.purchasedPrice,
                 'sellingPriceRange.minSellingPrice': updatedProduct.sellingPriceRange.minSellingPrice,
                 'sellingPriceRange.maxSellingPrice': updatedProduct.sellingPriceRange.maxSellingPrice,
@@ -476,6 +511,14 @@ const UpdateProduct = asyncHandler(async (req, res) => {
         { new: true, upsert: true, setDefaultsOnInsert: true } // Options
     ); 
     console.log(cumulativeProduct);
+    const productAfter = await Product.findOne({name: product.name, category: product.category});
+    const cumulativeProductAfter = await CumulativeProducts.findOne({name: product.name, category: product.category});
+
+    if (!productAfter && cumulativeProductAfter) {
+        if (cumulativeProductAfter.quantity === 0) {
+        await cumulativeProductAfter.deleteOne();
+    }
+}
 
     res.status(200).json(updatedProduct);
 } catch (error) {
@@ -496,4 +539,5 @@ module.exports = {
     getCumulativeProducts,
     deleteProduct,
     UpdateProduct,
+    deleteCumulativeProduct,
 };

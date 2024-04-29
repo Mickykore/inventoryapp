@@ -51,10 +51,6 @@ export const CumulativeProducts = () => {
           accessor: 'name'
         },
         {
-          Header: 'Brand',
-          accessor: 'brand'
-        },
-        {
           Header: 'Category',
           accessor: 'category.name',
         },

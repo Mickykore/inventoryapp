@@ -32,7 +32,6 @@ import { CumulativeProducts } from './dashBoard/CumulativeProducts';
 const initialState = {
   name: "",
   category: "",
-  brand: "",
   singleSalePrice: "",
   quantity: "",
   description: "",
@@ -71,9 +70,10 @@ export const Sales = () => {
   const [addedSales, setAddedSales] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [printView, setPrintView] = useState(false);
+  const [showBuyerInfo, setShowBuyerInfo] = useState(false);
 
 
-  const {name, category, brand, singleSalePrice, quantity, description, buyer, paymentMethod, itemIdentification, includeVAT} = saleForm;
+  const {name, category, singleSalePrice, quantity, description, buyer, paymentMethod, itemIdentification, includeVAT} = saleForm;
 
   const seller = useSelector(selectName);
 
@@ -98,7 +98,6 @@ export const Sales = () => {
     const data = {
       name,
       category,
-      brand,
       singleSalePrice,
       quantity,
       seller,
@@ -176,10 +175,6 @@ export const Sales = () => {
       {
         Header: 'Product Name',
         accessor: 'product.name'
-      },
-      {
-        Header: 'Brand',
-        accessor: 'product.brand'
       },
       {
         Header: 'Category',
@@ -263,7 +258,6 @@ export const Sales = () => {
     return ProductsCumulative.filter(product => product.category.name === category);
   }, [category, ProductsCumulative]);
 
-  const uniqueBrands = [...new Set(filteredProducts.map(product => product.brand.toLowerCase()))];
 
   return (
     <>
@@ -290,147 +284,156 @@ export const Sales = () => {
         </div>
         {(showSales === "add sales") && (
           <>
-          <form onSubmit={addSale} className=" g-3 col-md-5"style={{fontSize: "1.5rem", padding: "1.5rem"}}>
-            <div className="form-group">
-                  <label htmlFor="category">Category</label>
-                  <select className="form-control form-select form-select-lg" name="category" value={category} onChange={handleInputChange} >
-                      <option value="">Select a category...</option>
-                      {categories.map((category) => (
-                        <option key={category._id} value={category.name}>{category.name}</option>
-                      ))}
-                  </select>
-              </div>
-            <div className="form-group">
-                  <label htmlFor="category">Product Name</label>
-                  <select className="form-control form-select form-select-lg" name="name" value={name} onChange={handleInputChange} >
-                      <option value="">Select Product Name...</option>
-                      {filteredProducts.map((product) => (
-                        <option key={product._id} value={product.name}>{product.name}</option>
-                      ))}
-                  </select>
+          <div className='row'>
+            <div className='col-md-2' style={{ width: "350px"}}>
+            <form onSubmit={addSale} style={{fontSize: "1.5rem", padding: "1.5rem"}}>
+              <div className="form-group">
+                    <label htmlFor="category">Category</label>
+                    <select className="form-control form-select form-select-lg" name="category" value={category} onChange={handleInputChange} >
+                        <option value="">Select a category...</option>
+                        {categories.map((category) => (
+                          <option key={category._id} value={category.name}>{category.name}</option>
+                        ))}
+                    </select>
                 </div>
               <div className="form-group">
-                  <label htmlFor="category">Brand</label>
-                  <select className="form-control form-select form-select-lg" name="brand" value={brand} onChange={handleInputChange} >
-                      <option value="">Select a Brand...</option>
-                      {uniqueBrands.map((brand) => (
-                        <option key={brand} value={brand}>{brand}</option>
-                      ))}
+                    <label htmlFor="category">Product Name</label>
+                    <select className="form-control form-select form-select-lg" name="name" value={name} onChange={handleInputChange} >
+                        <option value="">Select Product Name...</option>
+                        {filteredProducts.map((product) => (
+                          <option key={product._id} value={product.name}>{product.name}</option>
+                        ))}
+                    </select>
+                  </div>
+                <div className="form-group">
+                  <label htmlFor="singleSalePrice">Selling Price</label>
+                  <input type="number" min="1" required className="form-control" id="singleSalePrice" placeholder="Enter Single Sale Price" name="singleSalePrice" value={singleSalePrice} onChange={handleInputChange}/>
+                </div>
+                <div className="form-group">
+                <div className="form-check form-switch" style={{fontSize: "20px", paddingLeft: "0em"}}>
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    name="includeVAT"
+                    checked={includeVAT}
+                    style={{marginLeft: "0.1px"}}
+                    onChange={(e) => setSaleForm({ ...saleForm, includeVAT: e.target.checked })}
+                  />
+                  <label className="form-check-label">-Include VAT</label>
+                </div>
+              </div>
+                <div className="form-group">
+                  <label htmlFor="quantity">Quantity</label>
+                  <input type="number" min="1" required className="form-control" id="quantity" placeholder="Enter Quantity" name="quantity" value={quantity} onChange={handleInputChange}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="paymentMethod">Payment Method</label>
+                  <select className="form-control" id="paymentMethod" name="paymentMethod" value={paymentMethod} onChange={handleInputChange}>
+                    <option value="">Select Payment Method</option>
+                    <option value="bank">Bank</option>
+                    <option value="cash">Cash</option>
                   </select>
                 </div>
-              <div className="form-group">
-                <label htmlFor="singleSalePrice">Selling Price</label>
-                <input type="number" min="1" required className="form-control" id="singleSalePrice" placeholder="Enter Single Sale Price" name="singleSalePrice" value={singleSalePrice} onChange={handleInputChange}/>
+                <div className="form-group">
+                  <label htmlFor="itemIdentification">Item Identification</label>
+                  <input type="text" className="form-control" id="itemIdentification" placeholder="Enter Item Identification" name="itemIdentification" value={itemIdentification} onChange={handleInputChange} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="description">Discription</label>
+                  <textarea type="text" className="form-control" id="description" placeholder="Enter Discription" name="description" value={description} onChange={handleInputChange}/>
+                </div>
+                <div className="form-group">
+                <div className="form-check form-switch" style={{fontSize: "20px", paddingLeft: "0em"}}>
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={showBuyerInfo}
+                    style={{marginLeft: "0.1px"}}
+                    onChange={(e) => setShowBuyerInfo(e.target.checked)}
+                  />
+                  <label className="form-check-label">-Fill Buyer Info</label>
+                </div>
               </div>
-              <div className="form-group">
-              <label className="form-label">Include VAT</label>
-              <div className="form-check form-switch" style={{fontSize: "20px", paddingLeft: "0em"}}>
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="includeVAT"
-                  checked={includeVAT}
-                  style={{marginLeft: "0.1px"}}
-                  onChange={(e) => setSaleForm({ ...saleForm, includeVAT: e.target.checked })}
-                />
-                <label className="form-check-label">-Include VAT</label>
-              </div>
+              {showBuyerInfo && (
+                <>
+                <h2>Buyer Info</h2>
+                <div className="form-group">
+                  <label htmlFor="buyerName">Buyer Name</label>
+                  <input type="text" className="form-control" id="buyerName" placeholder="Enter Buyer Name" name="buyerName" value={buyer.buyerName} onChange={(e) => setSaleForm({ ...saleForm, buyer: { ...buyer, buyerName: e.target.value } })} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="buyerPhoneNumber">Buyer Phone Number</label>
+                  <input type="text" className="form-control" id="buyerPhoneNumber" placeholder="Enter Buyer Phone Number" name="buyerPhoneNumber" value={buyer.phoneNumber} onChange={(e) => setSaleForm({ ...saleForm, buyer: { ...buyer, phoneNumber: e.target.value } })} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="buyerTinNumber">Buyer TIN Number</label>
+                  <input type="text" className="form-control" id="buyerTinNumber" placeholder="Enter Buyer TIN Number" name="buyerTinNumber" value={buyer.tinNumber} onChange={(e) => setSaleForm({ ...saleForm, buyer: { ...buyer, tinNumber: e.target.value } })} />
+                </div>
+                </>
+              )}
+                <button type="submit" className="btn btn-primary">Add Sale</button>
+            </form>
             </div>
-              <div className="form-group">
-                <label htmlFor="quantity">Quantity</label>
-                <input type="number" min="1" required className="form-control" id="quantity" placeholder="Enter Quantity" name="quantity" value={quantity} onChange={handleInputChange}/>
-              </div>
-              <div className="form-group">
-                <label htmlFor="paymentMethod">Payment Method</label>
-                <select className="form-control" id="paymentMethod" name="paymentMethod" value={paymentMethod} onChange={handleInputChange}>
-                  <option value="">Select Payment Method</option>
-                  <option value="bank">Bank</option>
-                  <option value="cash">Cash</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="itemIdentification">Item Identification</label>
-                <input type="text" className="form-control" id="itemIdentification" placeholder="Enter Item Identification" name="itemIdentification" value={itemIdentification} onChange={handleInputChange} />
-              </div>
-              <div className="form-group">
-                <label htmlFor="description">Discription</label>
-                <textarea type="text" className="form-control" id="description" placeholder="Enter Discription" name="description" value={description} onChange={handleInputChange}/>
-              </div>
+            <div className='col-md-8'>
+            <div id="printableArea" className='table-responsive'>
               <br />
-              <h2>Buyer Info</h2>
-              <div className="form-group">
-                <label htmlFor="buyerName">Buyer Name</label>
-                <input type="text" className="form-control" id="buyerName" placeholder="Enter Buyer Name" name="buyerName" value={buyer.buyerName} onChange={(e) => setSaleForm({ ...saleForm, buyer: { ...buyer, buyerName: e.target.value } })} />
-              </div>
-              <div className="form-group">
-                <label htmlFor="buyerPhoneNumber">Buyer Phone Number</label>
-                <input type="text" className="form-control" id="buyerPhoneNumber" placeholder="Enter Buyer Phone Number" name="buyerPhoneNumber" value={buyer.phoneNumber} onChange={(e) => setSaleForm({ ...saleForm, buyer: { ...buyer, phoneNumber: e.target.value } })} />
-              </div>
-              <div className="form-group">
-                <label htmlFor="buyerTinNumber">Buyer TIN Number</label>
-                <input type="text" className="form-control" id="buyerTinNumber" placeholder="Enter Buyer TIN Number" name="buyerTinNumber" value={buyer.tinNumber} onChange={(e) => setSaleForm({ ...saleForm, buyer: { ...buyer, tinNumber: e.target.value } })} />
-              </div>
-              <button type="submit" className="btn btn-primary">Add Sale</button>
-          </form>
-          <div id="printableArea" className='table-responsive'>
-            <br />
-          <h2>Added Sales</h2>
-          <table className="table table-striped table-hover caption-top" style={{fontSize: "12px"}}>
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Name</th>
-                <th>Brand</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Total</th>
-                <th>Buyer Name</th>
-                <th>Buyer Phone Number</th>
-                <th>Buyer Tin</th>
-                <th className="action-column">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {addedSales.map((sale, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{sale.name}</td>
-                  <td>{sale.brand}</td>
-                  <td>{sale.category}</td>
-                  <td>{sale.singleSalePrice}</td>
-                  <td>{sale.quantity}</td>
-                  <td>{sale.singleSalePrice * sale.quantity}</td>
-                  <td>{sale.buyer.buyerName}</td>
-                  <td>{sale.buyer.phoneNumber}</td>
-                  <td>{sale.buyer.tinNumber}</td>
-                  <td className="action-column">
-                  <button className="btn btn-danger" style={{fontSize:"1.5rem"}} onClick={() => remove(index + 1)}>Remove</button>
-                  </td>
+            <h2>Added Sales</h2>
+            <table className="table table-striped table-hover caption-top" style={{fontSize: "12px"}}>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                  <th>Buyer Name</th>
+                  <th>Buyer Phone Number</th>
+                  <th>Buyer Tin</th>
+                  <th className="action-column">Action</th>
                 </tr>
-              ))}
-              <tr>
-            <td colSpan="6">Subtotal</td>
-            <td>{addedSales.reduce((sum, sale) => sum + sale.singleSalePrice * sale.quantity, 0)}</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-            </tbody>
-          </table>
-          {/* <button className="btn btn-primary action-column" >Submit Sale</button> */}
-          {isLoading ? (
-          <ButtonLoading className="btn btn-lg btn-primary " type="submit" disabled>Loading...</ButtonLoading>
-            ) : (
-              <button className="btn btn-lg btn-primary" type="submit" onClick={submitSales}>Submit Sale</button>
-          )}
+              </thead>
+              <tbody>
+                {addedSales.map((sale, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{sale.name}</td>
+                    <td>{sale.category}</td>
+                    <td>{sale.singleSalePrice}</td>
+                    <td>{sale.quantity}</td>
+                    <td>{sale.singleSalePrice * sale.quantity}</td>
+                    <td>{sale.buyer.buyerName}</td>
+                    <td>{sale.buyer.phoneNumber}</td>
+                    <td>{sale.buyer.tinNumber}</td>
+                    <td className="action-column">
+                    <button className="btn btn-danger" style={{fontSize:"1.5rem"}} onClick={() => remove(index + 1)}>Remove</button>
+                    </td>
+                  </tr>
+                ))}
+                <tr>
+              <td colSpan="6">Subtotal</td>
+              <td>{addedSales.reduce((sum, sale) => sum + sale.singleSalePrice * sale.quantity, 0)}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+          </tr>
+              </tbody>
+            </table>
+            {/* <button className="btn btn-primary action-column" >Submit Sale</button> */}
+            {isLoading ? (
+            <ButtonLoading className="btn btn-lg btn-primary " type="submit" disabled>Loading...</ButtonLoading>
+              ) : (
+                <button className="btn btn-lg btn-primary" type="submit" onClick={submitSales}>Submit Sale</button>
+            )}
 
-          <ReactToPrint
-            trigger={() => <button className="btn btn-primary action-column">Print Added Sales</button>}
-            content={() => componentRef.current}/>
-          <ComponentToPrint ref={componentRef} addedSales={addedSales} />
-        </div>
+            <ReactToPrint
+              trigger={() => <button className="btn btn-primary action-column">Print Added Sales</button>}
+              content={() => componentRef.current}/>
+            <ComponentToPrint ref={componentRef} addedSales={addedSales} />
+          </div>
+            </div>
+          </div>
         </>
         )}
         {(showSales === "view sales") && (
