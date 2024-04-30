@@ -382,3 +382,79 @@ input {
 .form-switch {
   padding-left: 0;
 }
+
+/* Custom styles for react-datepicker */
+.custom-popper {
+  max-width: unset !important;
+}
+
+.custom-calendar {
+  width: 80%;
+}
+
+.react-datepicker {
+  font-size: 2.5rem; /* Adjust the font size */
+}
+
+.react-datepicker__current-month {
+  font-size: 2.5rem; /* Adjust the month font size */
+}
+
+.react-datepicker__header {
+  padding: 0.5rem; /* Adjust the header padding */
+}
+
+.react-datepicker__day-names {
+  font-size: 2rem; /* Adjust the day name font size */
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  padding: 0.5rem 0; /* Adjust the day name padding */
+}
+
+.react-datepicker__month {
+  margin: 0;
+}
+
+.react-datepicker__day {
+  min-width: 30px; /* Adjust the day width */
+  height: 30px; /* Adjust the day height */
+  line-height: 30px;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.react-datepicker__year-dropdown-container {
+  font-size: 1.5rem; /* Adjust the font size */
+}
+
+.react-datepicker__year-select {
+  padding: 0;
+  font-size: 2rem;
+}
+
+.react-datepicker__input-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: static !important;
+}
+
+.react-datepicker__input-container > svg {
+  width: 2.3rem; /* Adjust the size of the icon */
+  height: 2.3rem; /* Adjust the size of the icon */
+  margin: 6px; 
+  padding-right: 500rem;
+}
+
+.react-datepicker__view-calendar-icon input {
+  padding: 6px 10px 5px 5px !important;
+}
+
+.react-datepicker__input-container .react-datepicker__calendar-icon {
+  position: absolute;
+  padding: 0.5rem;
+  box-sizing: content-box;
+  margin-left: 210px;
+}
+

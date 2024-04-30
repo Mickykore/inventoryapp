@@ -8,12 +8,12 @@ import { useRef } from 'react';
 import ReactToPrint from 'react-to-print';
 import { useRedirectEmployee } from '../../../customHook/useRedirectEmploye';
 import { useRedirectLogOutUser } from '../../../customHook/useRedirectLogOutUser';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { toEthiopian, toGregorian } from 'ethiopic-js';
+import { EthDateTime, limits } from 'ethiopian-calendar-date-converter'
 
 
-const initialState = {
-  startDate: '',
-  endDate: '',
-};
 
 const CustomReports = () => {
 
@@ -21,22 +21,19 @@ const CustomReports = () => {
   useRedirectEmployee();
 
   const firstComponentRef = useRef();
-
-  const [inputDate, setInputDate] = useState(initialState);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [totalSales, setTotalSales] = useState(0);
   const [totalProfits, setTotalProfits] = useState(0);
   const [totalPurchases, setTotalPurchases] = useState(0);
   const [printView, setPrintView] = useState(false);
+  const [convertedDate, setConveredDate] = useState('');
+  const [conversionType, setConversionType] = useState('toGregorian');
+  const [gDate, setGDate] = useState("")
 
 
   const { totalSale, totalExpense, totalProfit, totalPurchase } = useSelector((state) => state.report);
-
-
-
-  const { startDate, endDate } = inputDate;
-
-   
 
   useEffect(() => {
     setTotalExpenses(totalExpense);
@@ -45,10 +42,6 @@ const CustomReports = () => {
     setTotalPurchases(totalPurchase);
   }, [totalSale, totalExpense, totalProfit, totalPurchase]);
 
-  const handleDateChange = (e) => {
-    const {name, value} = e.target;
-    setInputDate({ ...inputDate, [name]: value });
-  };
 
   const handlePrint = () => {
     setPrintView(true);
@@ -58,6 +51,29 @@ const CustomReports = () => {
   };
 
 
+  const convertToGregorian = (ethiopianDate) => {
+    const [year, month, day] = ethiopianDate.split('/').map(Number);
+    const gregorianDate = toGregorian(year, month, day);
+    return gregorianDate.join('/');
+  };
+
+  // const convertToEthiopian = (gregorianDate) => {
+  //   const [year, month, day] = gregorianDate.split('/').map(Number);
+  //   console.log("oj", year, month, day);
+  //   const ethiopianDate = EthDateTime.fromEuropeanDate(year, month, day, 1, // hour (in Ethioian Time format)
+  //   52, // minute (in Ethioian Time format)
+  //   52,)
+  //   return ethiopianDate.join('/');
+  // };
+
+  const handleDateConversion = () => {
+    if (conversionType === 'toGregorian') {
+      setGDate(convertToGregorian(convertedDate));
+    } 
+    // else {
+    //   setGDate((convertToEthiopian(convertedDate)));
+    // }
+  };
 
   
 
@@ -73,19 +89,74 @@ const CustomReports = () => {
         <Link to="/Yearly-report" ><button  className="nav-link">Yearly Report</button></Link>
       </ul>
         </div>
-      <h2>input Dates to get Report</h2>
-      <div className="col-md-8 align-items-center justify-content-center">
-      <form className="g-3 col-md-5" style={{fontSize: "1.5rem", padding: "1.5rem"}}>
-      <div>
-        <label htmlFor="startDate" className="form-label">Start Date:</label>
-        <input  type="text" className="form-control" id="startDate" name="startDate" placeholder="yyyy/mm/dd" value={startDate} onChange={handleDateChange} />
+        <div className='row mx-auto'>
+          <div className="col-md-6">
+      <h2>input Dates</h2>
+      <form style={{fontSize: "1.5rem", padding: "1.5rem", maxWidth: "300px", minHeight: "230px"}}>
+      <div className="form-group">
+        <label htmlFor="startDate" >Start Date:</label>
+        <DatePicker 
+        selected={startDate} 
+        showIcon
+        dateFormat='yyyy/MM/dd'
+        placeholder="yyyy/mm/dd" 
+        showYearDropdown
+        scrollableYearDropdown
+        onChange={date => setStartDate(date)} 
+        className="form-control"/>
       </div>
-      <div>
-        <label htmlFor="endDate" className="form-label">End Date:</label>
-        <input type="text" className="form-control" id="endDate" name="endDate" placeholder="yyyy/mm/dd" value={endDate} onChange={handleDateChange} />
+      <div >
+        <label htmlFor="endDate" className="form-label">End Date  : </label>
+        <DatePicker
+          selected={endDate}
+          showIcon
+          placeholder="yyyy/mm/dd"
+          showYearDropdown
+          scrollableYearDropdown
+          onChange={date => setEndDate(date)} 
+          dateFormat='yyyy/MM/dd'
+          className="form-control"
+          style={{ width: '300px', height: '350px' }} />
       </div>
-      <button className="btn btn-lg btn-primary ">Generate Report</button>
+      {/* <button className="btn btn-lg btn-primary ">Generate Report</button> */}
       </form>
+      </div>
+      <div className="col-md-6 px-auto">
+      <h2>Date Converter</h2>
+      <form className="col" style={{ fontSize: "1.5rem", padding: "1.5rem",  maxWidth: "300px", minHeight: "230px" }}>
+        <div className="form-group">
+          <label htmlFor="ethiopianDate">Ethiopian Date:</label>
+          <input
+            type="text"
+            className="form-control"
+            id="ethiopianDate"
+            placeholder="yyyy/mm/dd"
+            required
+            value={convertedDate}
+            onChange={(e) => setConveredDate(e.target.value)}
+          />
+          
+        </div>
+        {/* <div className="form-group">
+          <label>Convert:</label>
+          <select className="form-control" onChange={(e) => setConversionType(e.target.value)}>
+            <option value="toGregorian">To Gregorian</option>
+            <option value="toEthiopian">To Ethiopian</option>
+          </select>
+        </div> */}
+        <div className="form-group">
+          <button type="button" className="btn btn-primary" onClick={handleDateConversion}>Convert</button>
+        </div>
+        <label htmlFor="ethiopianDate">Gregorian Date:</label>
+        <input
+            type="text"
+            className="form-control"
+            id="ethiopianDate"
+            disabled
+            value={gDate}
+          />
+      </form>
+      </div>
       </div>
         <div>
         </div>

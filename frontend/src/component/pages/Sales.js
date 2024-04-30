@@ -262,7 +262,6 @@ export const Sales = () => {
   return (
     <>
       <div>
-        <h1 style={{textAlign: "center"}}>Sales</h1>
 
         <ul class="nav nav-pills">
             <li class="nav-item">

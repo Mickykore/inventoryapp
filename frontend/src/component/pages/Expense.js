@@ -200,7 +200,6 @@ export const Expense = () => {
   return (
     <div className="Expenses">
       <div>
-        <h1>expenses</h1>
         <ul class="nav nav-pills">
             <li class="nav-item">
             <button  className={showExpense ? 'nav-link' : 'nav-link disabled'} onClick={() => setShowExpense(false)}>Add Expense</button>

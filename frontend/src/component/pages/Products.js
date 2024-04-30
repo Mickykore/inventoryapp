@@ -51,6 +51,10 @@ export const Products = () => {
   const [showProduct, setShowProduct] = useState("add product");
   const [isLoading, setIsLoading] = useState(false);
   const [printView, setPrintView] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [filteredPurchased, setFilteredPurchased] = useState([]);
+  const [filteredMinSelling, setFilteredMinSelling] = useState([]);
+  const [filteredMaxSelling, setFilteredMaxSelling] = useState([]);
 
   // const [allProducts, setAllProducts] = useState([{}]);
   // const [showAddProduct, setShowAddProduct] = useState(true);
@@ -64,7 +68,11 @@ export const Products = () => {
   const categories = useSelector((state) => state.category.categories);
   const { products, isError } = useSelector((state) => state.product);
  
-
+  const ProductsFiltered = useMemo(() => {
+    // Filter ProductsCumulative based on the selected category
+    return products.filter(product => product.category.name === category);
+  }, [category, products]);
+  console.log(ProductsFiltered);
 
 
   const handleInputChange = (e) => {
@@ -73,7 +81,61 @@ export const Products = () => {
       ...product,
       [name]: value
     })
+
+    if (value === '') {
+      setFilteredProducts([]);
+      setFilteredPurchased([])
+      setFilteredMinSelling([])
+      setFilteredMaxSelling([])
+      return;
+    }
+    if(name === 'name') {
+      const filtered = ProductsFiltered.filter((prod) =>
+          prod.name.toLowerCase().startsWith(value.toLowerCase())
+        );
+      setFilteredProducts(filtered);
+    }
+    if(name === 'purchasedPrice') {
+      const filtered = ProductsFiltered.filter((prod) =>
+          prod.purchasedPrice.toString().startsWith(value)
+        );
+      setFilteredPurchased(filtered);
+    }
+    if(name === 'minSellingPrice') {
+      const filtered = ProductsFiltered.filter((prod) =>
+          prod.sellingPriceRange.minSellingPrice.toString().startsWith(value)
+        );
+      setFilteredMinSelling(filtered);
+    }
+    if(name === 'maxSellingPrice') {
+      const filtered = ProductsFiltered.filter((prod) =>
+          prod.sellingPriceRange.maxSellingPrice.toString().startsWith(value)
+        );
+      setFilteredMaxSelling(filtered);
+    }
+    
   }
+
+  const handleSelectProduct = (selectedProduct) => {
+    setProduct({ ...product, name: selectedProduct });
+    setFilteredProducts([]);
+  };
+
+  const handleSelectPurchased = (selectedPurchased) => {
+    setProduct({ ...product, purchasedPrice: selectedPurchased });
+    setFilteredPurchased([]);
+  };
+
+  const handleSelectMinSelling = (selectedMinSelling) => {
+    setProduct({ ...product, minSellingPrice: selectedMinSelling });
+    setFilteredMinSelling([]);
+  };
+
+  const handleSelectMaxSelling = (selectedMaxSelling) => {
+    setProduct({ ...product, maxSellingPrice: selectedMaxSelling });
+    setFilteredMaxSelling([]);
+  };
+  
 
   const addProduct = (e) => {
     e.preventDefault();
@@ -292,10 +354,24 @@ export const Products = () => {
                 <div className="mb-0">
                   <label htmlFor="name" className="form-label">Name</label>
                   <input className="form-control" placeholder="Name Of The Product" type="text" name="name" value={name} onChange={handleInputChange} />
+                  {filteredProducts.length > 0 && (
+                    <ul className="form-control">
+                      {filteredProducts.map((prod) => (
+                        <li key={prod._id} style={{cursor: "pointer"}} onClick={() => handleSelectProduct(prod.name)}>{prod.name}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <div className="mb-0">
                   <label htmlFor="purchasedPrice" className="form-label">Purchased Price</label>
                   <input className="form-control" type="number" min="1" required placeholder="Price Of The Product" name="purchasedPrice" value={purchasedPrice} onChange={handleInputChange} />
+                  {filteredPurchased.length > 0 && (
+                    <ul className="form-control">
+                      {filteredPurchased.map((prod) => (
+                        <li key={prod._id} style={{cursor: "pointer"}} onClick={() => handleSelectPurchased(prod.purchasedPrice)}>{prod.purchasedPrice}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <div className="mb-0 form-check form-switch" style={{ fontSize: "20px" }}>
                   <input className="form-check-input" type="checkbox" name="includeVAT" checked={includeVAT} style={{ marginLeft: "0.1px" }} onChange={(e) => setProduct({ ...product, includeVAT: e.target.checked })} />
@@ -304,10 +380,24 @@ export const Products = () => {
                 <div className="mb-0">
                   <label htmlFor="minSellingPrice" className="form-label">Minimum Selling Price</label>
                   <input className="form-control" type="number" min="1" required placeholder="Minimum Selling Price" name="minSellingPrice" value={minSellingPrice} onChange={handleInputChange} />
+                  {filteredMinSelling.length > 0 && (
+                    <ul className="form-control">
+                      {filteredMinSelling.map((prod) => (
+                        <li key={prod._id} style={{cursor: "pointer"}} onClick={() => handleSelectMinSelling(prod.sellingPriceRange.minSellingPrice)}>{prod.sellingPriceRange.minSellingPrice}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <div className="mb-0">
                   <label htmlFor="maxSellingPrice" className="form-label">Maximum Selling Price</label>
                   <input className="form-control" type="number" min="1" required placeholder="Maximum Selling Price" name="maxSellingPrice" value={maxSellingPrice} onChange={handleInputChange} />
+                  {filteredMaxSelling.length > 0 && (
+                    <ul className="form-control">
+                      {filteredMaxSelling.map((prod) => (
+                        <li key={prod._id} style={{cursor: "pointer"}} onClick={() => handleSelectMaxSelling(prod.sellingPriceRange.maxSellingPrice)}>{prod.sellingPriceRange.maxSellingPrice}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <div className="mb-0">
                   <label htmlFor="quantity" className="form-label">Quantity</label>
