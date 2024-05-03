@@ -1,5 +1,5 @@
 
-import { MdDashboard, MdOutlineProductionQuantityLimits, MdFormatListBulletedAdd, MdCategory } from "react-icons/md";
+import { MdDashboard, MdOutlineProductionQuantityLimits, MdFormatListBulletedAdd, MdCategory, MdContactMail } from "react-icons/md";
 import { ImProfile } from "react-icons/im";
 import { GiSellCard, GiExpense } from "react-icons/gi";
 import { TbReport } from "react-icons/tb";
@@ -45,6 +45,11 @@ const menu = [
     title: "Users",
     icon: <FaUsers />,
     path: "/Users",
+  },
+  {
+    title: "Contact Us",
+    icon: <MdContactMail />,
+    path: "/ContactUs",
   },
   {
     title: "Profile",

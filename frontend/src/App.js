@@ -35,6 +35,7 @@ import MonthlyReport from "./component/pages/reports/AutoReport/MonthlyReport";
 import { Users } from "./component/pages/Users";
 import { Expense } from "./component/pages/Expense";
 import { EditExpense } from "./component/pages/edit/EditExpense";
+import ContactUs from "./component/pages/ContactUs";
 
 axios.defaults.withCredentials = true;
 // import './signup.css';
@@ -181,6 +182,13 @@ function App() {
           <Layout>
             <YearlyReport />
           </Layout>
+        </Sidebar>} />
+
+        <Route path="ContactUs" element={
+        <Sidebar>
+          <Layout>
+            <ContactUs />
+          </Layout> 
         </Sidebar>} />
 
         <Route path="Signin" element={<Login />} />

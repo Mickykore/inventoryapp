@@ -206,3 +206,25 @@ export const updateSecretKey = async (secretKey) => {
         toast.error(message);
     }
 }
+
+export const contactUs = async (formData) => {
+    try {
+        console.log("co", formData)
+        const response = await axios.post(`${BACKEND_URL}/api/contactUs`, formData, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        if (response.statusText === "OK") {
+            toast.success("Message sent successfully")
+        }
+        return response.data;
+    } catch (error) {
+        const message = (
+            error.response && error.response.data &&
+            error.response.data.message
+
+               ) || error.message || error.toString();
+        toast.error(message);
+    }
+}
