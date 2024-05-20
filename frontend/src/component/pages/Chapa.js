@@ -2,10 +2,14 @@ import React from 'react'
 
 function Chapa({firstName, lastName, phone, amount, email}) {
 
-    const tx_ref = `${firstName}`;
+  const date = new Date().toISOString().slice(0, 10); // Get YYYY-MM-DD format
+  const time = new Date().toISOString().slice(11, 16).replace(":", ""); // Get HH:MM format (without seconds)
+  const tx_ref = `${firstName}-${date}-${time}`;
+  console.log(tx_ref);
+  console.log(typeof(tx_ref));
     const publicKey = "CHAPUBK_TEST-ozOsLYqwbv4tUmSbATNwGxTD9Ikzb4Wt"
   return (
-    <div>Chapa
+    <div>
         <form method="POST" action="https://api.chapa.co/v1/hosted/pay" >
             <input type="hidden" name="public_key" value={publicKey} />
             <input type="hidden" name="tx_ref" value={tx_ref} />
@@ -20,7 +24,7 @@ function Chapa({firstName, lastName, phone, amount, email}) {
             <input type="hidden" name="callback_url" value="https://example.com/callbackurl" />
             <input type="hidden" name="return_url" value="http://localhost:3000/" />
             <input type="hidden" name="meta[title]" value="test" />
-            <button type="submit">Pay Now</button>
+            <button className="btn btn-lg btn-primary" type="submit">Pay Now</button>
         </form>
     </div>
   )
