@@ -53,12 +53,12 @@ export const UptadePassword = () => {
       <form onSubmit={update}>
         <h1 className="h3 mb-3 fw-normal">Update Password</h1>
         <div className="form-floating">
-          <input type="password" className="form-control" id="floatingPassword" placeholder="Old Password" name="oldPassword" value={oldPassword} onChange={handleInputChange}/>
-          <label htmlFor="floatingPassword">Old Password</label>
+          <input type="password" className="form-control" id="oldPassword" placeholder="Old Password" name="oldPassword" value={oldPassword} onChange={handleInputChange}/>
+          <label htmlFor="oldPassword">Old Password</label>
         </div>
         <div className="form-floating">
-          <input type="password" className="form-control" id="floatingPassword" placeholder="New Password" name="newPassword" value={newPassword} onChange={handleInputChange}/>
-          <label htmlFor="floatingPassword">New Password</label>
+          <input type="password" className="form-control" id="newPassword" placeholder="New Password" name="newPassword" value={newPassword} onChange={handleInputChange}/>
+          <label htmlFor="newPassword">New Password</label>
         </div>
         <div className="form-floating">
           <input type="password" className="form-control" id="confirmPassword" placeholder="Confirm New Password" name="confirmPassword" value={confirmPassword} onChange={handleInputChange}/>

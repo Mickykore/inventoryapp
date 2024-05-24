@@ -72,7 +72,7 @@ export const Products = () => {
     // Filter ProductsCumulative based on the selected category
     return products.filter(product => product.category.name === category);
   }, [category, products]);
-  console.log(ProductsFiltered);
+  // console.log(ProductsFiltered);
 
 
   const handleInputChange = (e) => {

@@ -29,7 +29,7 @@ export const CumulativeProducts = () => {
     const { ProductsCumulative } = useSelector((state) => state.product); 
     const  { userType } = useSelector((state) => state.auth);
     const isAdmin = userType === "admin" ? true : false;
-    console.log(isAdmin)
+    // console.log(isAdmin)
 
 
     const handlePrint = () => {

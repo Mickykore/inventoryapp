@@ -55,17 +55,14 @@ export const logoutUser = async () => {
 
 export const forgetpassword = async (user) => {
     try {
-        console.log("password forgeted")
         const response = await axios.post(`${BACKEND_URL}/api/users/forgotpassword`, user);
         if (response.status === 200 ) {
-        console.log("password forgeted")
             toast.success(response.data.message)
         } else {
             toast.error(response.data.message)
         }
         return response.data;
     } catch (error) {
-        console.log("password forgeted error")
         const message = (
             error.response && error.response.data &&
             error.response.data.message
@@ -124,7 +121,6 @@ export const getUserProfiile = async () => {
 
 export const updateUserProfile = async (profileData) => {
     try {
-        console.log("ff", profileData)
         const response = await axios.patch(`${BACKEND_URL}/api/users/updateprofile/`, profileData);
         if (response.statusText === "OK") {
             toast.success("Profile updated successfully")
@@ -143,7 +139,6 @@ export const updateUserProfile = async (profileData) => {
 export const getAllUsersData = async () => {
     try {
         const response = await axios.get(`${BACKEND_URL}/api/users`);
-        console.log("userdata", response.data)
         return response.data;
     } catch (error) {
         const message = (
@@ -158,7 +153,6 @@ export const getAllUsersData = async () => {
 export const deleteUser = async (id) => {
     try {
         const response = await axios.delete(`${BACKEND_URL}/api/users/${id}`);
-        console.log("res", response.data)
         if (response && response.statusText === "OK") {
             toast.success("User deleted successfully")
         }
@@ -209,7 +203,6 @@ export const updateSecretKey = async (secretKey) => {
 
 export const contactUs = async (formData) => {
     try {
-        console.log("co", formData)
         const response = await axios.post(`${BACKEND_URL}/api/contactUs`, formData, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'

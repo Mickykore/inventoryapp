@@ -21,7 +21,7 @@ const app = express();
 app.use(express.json());
 app.use(cors(
     {
-        origin: ['http://localhost:3000', "https://inventoryapp-seven.vercel.app"], 
+        origin: ['http://localhost:3001', "https://inventoryapp-seven.vercel.app"], 
         credentials: true
     }
 ));
@@ -44,7 +44,7 @@ app.use('/api/orders', orderRoute);
 app.use('/api/expenses', expenseRoute);
 app.use('/api/updatesecretkey', secretKeyRoute);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 7000;
 
 //error middleware
 app.use(errorHandler);

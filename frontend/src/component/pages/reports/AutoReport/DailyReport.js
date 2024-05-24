@@ -25,7 +25,7 @@ const DailyReport = () => {
 
   const { totalSale, totalExpense, totalProfit, totalPurchase } = useSelector((state) => state.report);
 
-  console.log(totalSale, totalExpense, totalProfit, totalPurchase);
+  // console.log(totalSale, totalExpense, totalProfit, totalPurchase);
   
   useEffect(() => {
     const currentDate = new Date().toISOString().slice(0, 10);
