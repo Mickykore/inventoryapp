@@ -7,7 +7,7 @@ const protect = asyncHandler(async (req, res, next) => {
         const token = req.cookies.token;
         if(!token) {
             res.status(401)
-            throw new Error('Not authorized, no token');
+            throw new Error('Not authorized');
         }
         // verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);

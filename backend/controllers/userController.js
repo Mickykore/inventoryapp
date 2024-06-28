@@ -144,13 +144,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
         if(passwordIsCorrect) {
              // send HTTP only cookie
-        res.cookie('token', token, {
-            "path": "/",
-            httpOnly: true,
-            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            sameSite: 'none',
-            secure: true,
-        });
+            res.cookie('token', token, {
+                "path": "/",
+                httpOnly: true,
+                expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                sameSite: 'none',
+                secure: true,
+            });
         }
         if(user && passwordIsCorrect) {
             const { _id, firstname, fathername, email, photo, phone, userType, bio } = user;
