@@ -15,16 +15,18 @@ const errorHandler = require('./middleware/errorMiddleware');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 
-const app = express();
-
-//middleware
-app.use(express.json());
 app.use(cors(
     {
         origin: ['https://inventoryapp-seven.vercel.app', 'http://localhost:3000'], 
         credentials: true
     }
 ));
+
+const app = express();
+
+//middleware
+app.use(express.json());
+
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
