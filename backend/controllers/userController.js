@@ -7,6 +7,7 @@ const Token = require('../models/tokenmodel');
 const sendEmail = require('../utils/sendemail');
 const mongoose = require('mongoose');
 const {AdminSecretKey, EmployeeSecretKey} = require('../models/secretKeyModel');
+const capitalizeAndClean = require('../utils/stringUtils');
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -16,7 +17,10 @@ const generateToken = (id) => {
 
 const registerUser = asyncHandler(async (req, res) => {
 
-    const { firstname, fathername, email, password, userType, adminSecretKey, employeeSecretKey } = req.body;
+    let { firstname, fathername, email, password, userType, adminSecretKey, employeeSecretKey } = req.body;
+
+    firstname = capitalizeAndClean(firstname);
+    fathername = capitalizeAndClean(fathername);
     
     if(!firstname || !fathername || !email || !password || (!adminSecretKey && userType === "admin") || 
     (!employeeSecretKey && userType === "employee")) {
@@ -265,7 +269,10 @@ const registerUser = asyncHandler(async (req, res) => {
         
 
         if(user) {
-            const { firstname, fathername, email, photo, phone, password } = req.body;
+            let { firstname, fathername, email, photo, phone, password } = req.body;
+            
+            firstname = capitalizeAndClean(firstname);
+            fathername = capitalizeAndClean(fathername);
 
             const passwordIsCorrect = await bcrypt.compare(password, user.password);
             console.log("password", passwordIsCorrect)

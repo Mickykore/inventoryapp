@@ -5,6 +5,7 @@ const {upload, fileSizeFormatter} = require('../utils/fileUpload');
 const cloudinary = require('cloudinary').v2;
 const mongoose = require('mongoose');
 const { Sale, Cumulativesales } = require('../models/salesModel');
+const capitalizeAndClean = require('../utils/stringUtils');
 //
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,11 +13,18 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const toFixedTwo = (num) => {
+    return parseFloat(num.toFixed(2));
+};
+
 // @desc    Fetch all products
 
 // create category
 const createCategory = asyncHandler(async (req, res) => {
-    const {name} = req.body;
+    try {
+    let {name} = req.body;
+    name = await capitalizeAndClean(name)
+    console.log(name);
     const existingCategory = await Category.findOne({name});
 
 
@@ -41,6 +49,10 @@ const createCategory = asyncHandler(async (req, res) => {
     await category.save();
     res.json(category);
     // res.send('get all products');
+} catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+}
 
 });
 
@@ -59,16 +71,19 @@ const UpdateCategory = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Invalid product ID');
     }
+
+    let {name} = req.body;
+    name = await capitalizeAndClean(name);
     const category = await Category.findById(req.params.id);
 
-    const existingCategory = await Category.findOne({name: req.body.name});
+    const existingCategory = await Category.findOne({name});
     if (existingCategory) {
         res.status(400);
         throw new Error('Category already exists');
     }
 
     if (category) {
-        category.name = req.body.name || category.name;
+        category.name = name || category.name;
         const updatedCategory = await category.save();
         res.json(updatedCategory);
     } else {
@@ -107,9 +122,9 @@ const getCategoryById = asyncHandler(async (req, res) => {
         throw new Error('Invalid product ID');
     }
 
-    const product = await Category.findById(req.params.id)
-    if (product) {
-        res.json(product);
+    const category = await Category.findById(req.params.id)
+    if (category) {
+        res.json(category);
     } else {
         res.status(404);
         throw new Error('Product not found');
@@ -121,21 +136,21 @@ const CreateProduct = asyncHandler(async (req, res) => {
     try {
     const userId = req.user._id;
 
-
     // Converting properties to numbers without creating new variables
     req.body.purchasedPrice = parseFloat(req.body.purchasedPrice);
     req.body.minSellingPrice = parseFloat(req.body.minSellingPrice );
     req.body.maxSellingPrice = parseFloat(req.body.maxSellingPrice);
     req.body.quantity = parseInt(req.body.quantity);
 
-    const {name, category,  purchasedPrice, minSellingPrice, maxSellingPrice, quantity, addedBy, description, image, includeVAT} = req.body;
-
+    let {name, category,  purchasedPrice, minSellingPrice, maxSellingPrice, quantity, addedBy, description, image, includeVAT} = req.body;
+    
+    name = await capitalizeAndClean(name);
 
     // Calculate adjusted purchased price and VAT amount
     let adjustedPurchasedPrice = purchasedPrice;
     let VATamount = 0;
     if (includeVAT) {
-        adjustedPurchasedPrice = purchasedPrice / 1.15;
+        adjustedPurchasedPrice = toFixedTwo(purchasedPrice / 1.15);
         VATamount = (purchasedPrice - adjustedPurchasedPrice);
     }
 
@@ -366,7 +381,9 @@ const UpdateProduct = asyncHandler(async (req, res) => {
     req.body.maxSellingPrice = parseFloat(req.body.maxSellingPrice);
     req.body.quantity = parseInt(req.body.quantity);
 
-    const {name, category,  purchasedPrice, minSellingPrice, maxSellingPrice, quantity, addedBy, description, image, includeVAT} = req.body;
+    let {name, category,  purchasedPrice, minSellingPrice, maxSellingPrice, quantity, addedBy, description, image, includeVAT} = req.body;
+
+    name = await capitalizeAndClean(name);
 
     if (!name || !purchasedPrice || !quantity || !minSellingPrice || !maxSellingPrice || !category ) {
         res.status(400);
@@ -379,7 +396,7 @@ const UpdateProduct = asyncHandler(async (req, res) => {
     let adjustedPurchasedPrice = purchasedPrice;
     let VATamount = product.VATamount;
     if (includeVAT) {
-        adjustedPurchasedPrice = purchasedPrice / 1.15;
+        adjustedPurchasedPrice = toFixedTwo(purchasedPrice / 1.15);
         VATamount = (purchasedPrice - adjustedPurchasedPrice);
     } else {
         VATamount = 0;

@@ -16,6 +16,7 @@ import { confirmAlert } from 'react-confirm-alert';
 import ButtonLoading from '../../loader/ButtonLoader';
 import { ProductPrint } from './print/ProductPrint';
 import ReactToPrint from 'react-to-print';
+import fullLoader from '../../loader/fullLoader';
 
 class ComponentToPrint extends React.Component {
   render() {
@@ -314,6 +315,10 @@ export const Products = () => {
   } = tableInstance;
 
   const { pageIndex, globalFilter, pageSize } = state;
+
+  // if (isLoading) {
+  //   return <fullLoader />
+  // }
 
   return (
     <div className="Orders">

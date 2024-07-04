@@ -6,9 +6,21 @@ const Joi = require('joi');
 const CustomError = require('../utils/customError');
 const bulkProducts = require("./bulkproduct.json")
 
+const capitalizeAndClean = (str) => {
+    return str.replace(/\s+/g, ' ').trim().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+};
+
+const toFixedTwo = (num) => {
+    return parseFloat(num.toFixed(2));
+};
+
 const CreateBulkProduct = asyncHandler(async (req, res) => {
     try {
-    const products = req.body;
+        const products = req.body.map(product => ({
+            ...product,
+            name: capitalizeAndClean(product.name),
+            category: capitalizeAndClean(product.category),
+        }));
     console.log(req.body)
     const userId = req.user._id;
     // console.log(products);
@@ -20,7 +32,8 @@ const CreateBulkProduct = asyncHandler(async (req, res) => {
         minSellingPrice: Joi.number().required(),
         maxSellingPrice: Joi.number().required(),
         quantity: Joi.number().required(),
-        image: Joi.string()
+        image: Joi.string(),
+        description: Joi.string(),
     });
 
     const categories = await Category.find({ name: { $in: products.map(p => p.category) } });
@@ -36,7 +49,7 @@ const CreateBulkProduct = asyncHandler(async (req, res) => {
         console.log(name, category, purchasedPrice, minSellingPrice, maxSellingPrice, quantity, includeVAT)
 
         // adjust the prices to include VAT
-        const adjustedPurchasedPrice = includeVAT ? product.purchasedPrice / 1.15 : product.purchasedPrice;
+        const adjustedPurchasedPrice = includeVAT ? toFixedTwo(product.purchasedPrice / 1.15) : toFixedTwo(product.purchasedPrice);
         const VATamount = includeVAT ? purchasedPrice - adjustedPurchasedPrice : 0;
         // console.log(product);
         const { error } = schema.validate(product);
@@ -64,7 +77,8 @@ const CreateBulkProduct = asyncHandler(async (req, res) => {
                 maxSellingPrice}, 
             category: categoryId,
             purchasedPrice: adjustedPurchasedPrice,
-            VATamount,};
+            VATamount,
+            description: description,};
     });
 
     const bulkProduct = await Product.insertMany(productsWithUserId);

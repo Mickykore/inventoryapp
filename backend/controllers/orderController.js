@@ -3,6 +3,7 @@ const asyncHandler = require('express-async-handler');
 const { upload, fileSizeFormatter } = require('../utils/fileUpload');
 const cloudinary = require('cloudinary').v2;
 const mongoose = require('mongoose');
+const capitalizeAndClean = require('../utils/stringUtils');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,7 +13,13 @@ cloudinary.config({
 
 const createOrder = async (req, res) => {
   try {
-    const {name, category, quantity, orderer, phoneNumber, description, image} = req.body;
+    let {name, category, quantity, orderer, phoneNumber, description, image} = req.body;
+
+    name = capitalizeAndClean(name);
+    orderer = capitalizeAndClean(orderer);
+    category = capitalizeAndClean(category);
+
+
     const userId = req.user._id;
     //vallidate data
     console.log("ok order");
@@ -116,7 +123,12 @@ const updateOrder = asyncHandler(async (req, res) => {
         throw new Error('Invalid product ID');
     }
 
-    const {name, category, quantity, orderer, phoneNumber, description, image} = req.body;
+    let {name, category, quantity, orderer, phoneNumber, description, image} = req.body;
+
+    name = capitalizeAndClean(name);
+    orderer = capitalizeAndClean(orderer);
+    category = capitalizeAndClean(category);
+    
     const order = await Order.findById(req.params.id); 
     //vallidate data
     if (!order) {

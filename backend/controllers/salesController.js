@@ -1,5 +1,6 @@
 const { Sale, Cumulativesales } = require('../models/salesModel');
 const { Category, Product, CumulativeProducts } = require('../models/productsModel');
+const capitalizeAndClean = require('../utils/stringUtils');
 
 const asyncHandler = require('express-async-handler');
 const User = require('../models/usermodels');
@@ -16,8 +17,9 @@ const CreateSales = asyncHandler(async (req, res) => {
     req.body.singleSalePrice = parseFloat(req.body.singleSalePrice);
     req.body.quantity = parseFloat(req.body.quantity);
 
-    const { name, category, singleSalePrice, quantity, seller, description, buyer, paymentMethod, itemIdentification, includeVAT } = req.body;
+    let { name, category, singleSalePrice, quantity, seller, description, buyer, paymentMethod, itemIdentification, includeVAT } = req.body;
 
+    buyer.buyerName = capitalizeAndClean(buyer.buyerName);
 
     let adjustedSalePrice = singleSalePrice;
     let SingleVATamount = 0;
@@ -270,9 +272,9 @@ const Updatesale = asyncHandler(async (req, res) => {
     req.body.singleSalePrice = parseFloat(req.body.singleSalePrice);
     req.body.quantity = parseFloat(req.body.quantity);
 
-    const { name, category, singleSalePrice, quantity, seller, description, buyer, paymentMethod, itemIdentification, includeVAT } = req.body;
+    let { name, category, singleSalePrice, quantity, seller, description, buyer, paymentMethod, itemIdentification, includeVAT } = req.body;
 
-
+    buyer.buyerName = capitalizeAndClean(buyer.buyerName);
 
     let adjustedSalePrice = singleSalePrice;
     let SingleVATamount = 0;

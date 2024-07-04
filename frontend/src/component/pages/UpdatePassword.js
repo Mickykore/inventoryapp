@@ -50,19 +50,16 @@ export const UptadePassword = () => {
 
   return (
     <main className="form-signin">
-      <form onSubmit={update}>
+      <form onSubmit={update} className="g-3 col-md-5 p-3">
         <h1 className="h3 mb-3 fw-normal">Update Password</h1>
-        <div className="form-floating">
+        <div>
           <input type="password" className="form-control" id="oldPassword" placeholder="Old Password" name="oldPassword" value={oldPassword} onChange={handleInputChange}/>
-          <label htmlFor="oldPassword">Old Password</label>
         </div>
-        <div className="form-floating">
+        <div>
           <input type="password" className="form-control" id="newPassword" placeholder="New Password" name="newPassword" value={newPassword} onChange={handleInputChange}/>
-          <label htmlFor="newPassword">New Password</label>
         </div>
-        <div className="form-floating">
+        <div>
           <input type="password" className="form-control" id="confirmPassword" placeholder="Confirm New Password" name="confirmPassword" value={confirmPassword} onChange={handleInputChange}/>
-          <label htmlFor="floatingPassword">Confirm New Password</label>
         </div>
         {isLoading ? (
           <ButtonLoading className="btn btn-lg btn-primary " type="submit" disabled>Loading...</ButtonLoading>

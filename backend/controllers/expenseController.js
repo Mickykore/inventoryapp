@@ -1,10 +1,14 @@
 const asyncHandler = require('express-async-handler');
 const { Expense } = require('../models/expenseModel');
+const capitalizeAndClean = require('../utils/stringUtils');
 
 // Create expense
 const createExpense = asyncHandler(async (req, res, next) => {
   try {
-  const { type, amount, description } = req.body;
+  let { type, amount, description } = req.body;
+
+  type = capitalizeAndClean(type);
+
   console.log("ok expense");
   if (!type || !amount) {
     res.status(400);
@@ -26,7 +30,9 @@ const createExpense = asyncHandler(async (req, res, next) => {
 const updateExpense = asyncHandler(async (req, res, next) => {
   try {
   const { id } = req.params;
-  const { type, amount, description } = req.body;
+  let { type, amount, description } = req.body;
+
+  type = capitalizeAndClean(type);
   console.log("ok expense");
 
 
