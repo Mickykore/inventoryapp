@@ -34,6 +34,7 @@ const ReportGenerator = ({startDate, endDate, timeframe}) => {
   
 
   const { reports } = useSelector((state) => state.report);
+  
 
   const columns = useMemo(() => [
     {
@@ -159,7 +160,7 @@ const ReportGenerator = ({startDate, endDate, timeframe}) => {
               );
             })}
             <tr>
-            <td colSpan="8">Subtotal</td>
+            <td colSpan="7">Subtotal</td>
             <td>{reports.reduce((sum, report) => sum + report.totalPrice, 0)}</td>
             <td>{reports.reduce((sum, report) => sum + report.totalProfit, 0)}</td>
             <td></td>

@@ -393,7 +393,7 @@ input {
 }
 
 .react-datepicker {
-  font-size: 2.5rem; /* Adjust the font size */
+  font-size: 1.5rem !important; /* Adjust the font size */
 }
 
 .react-datepicker__current-month {
@@ -425,7 +425,7 @@ input {
 }
 
 .react-datepicker__year-dropdown-container {
-  font-size: 1.5rem; /* Adjust the font size */
+  font-size: 2rem; /* Adjust the font size */
 }
 
 .react-datepicker__year-select {
@@ -457,4 +457,3 @@ input {
   box-sizing: content-box;
   margin-left: 210px;
 }
-

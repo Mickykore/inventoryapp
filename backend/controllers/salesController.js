@@ -19,7 +19,7 @@ const CreateSales = asyncHandler(async (req, res) => {
 
     let { name, category, singleSalePrice, quantity, seller, description, buyer, paymentMethod, itemIdentification, includeVAT } = req.body;
 
-    buyer.buyerName = capitalizeAndClean(buyer.buyerName);
+    buyer.buyerName = buyer.buyerName ? capitalizeAndClean(buyer.buyerName) : null;
 
     let adjustedSalePrice = singleSalePrice;
     let SingleVATamount = 0;

@@ -36,6 +36,7 @@ import { Users } from "./component/pages/Users";
 import { Expense } from "./component/pages/Expense";
 import { EditExpense } from "./component/pages/edit/EditExpense";
 import ContactUs from "./component/pages/ContactUs";
+import TaxReport from "./component/pages/reports/AutoReport/TaxReport";
 
 axios.defaults.withCredentials = true;
 // import './signup.css';
@@ -181,6 +182,13 @@ function App() {
         <Sidebar>
           <Layout>
             <YearlyReport />
+          </Layout>
+        </Sidebar>} />
+
+        <Route path="Tax-report" element={
+        <Sidebar>
+          <Layout>
+            <TaxReport />
           </Layout>
         </Sidebar>} />
 

@@ -54,6 +54,7 @@ const DailyReport = () => {
             <button  className="nav-link disabled"><Link to="/Daily-report">Daily Report</Link></button>
             <Link to="/Monthly-Report"><button  className="nav-link">Monthly Reports</button></Link>
             <Link to="/Yearly-report" ><button  className="nav-link">Yearly Report</button></Link>
+            <Link to="/Tax-report"><button  className="nav-link">Tax Report</button></Link>
           </ul>
         </div>
         <div>
