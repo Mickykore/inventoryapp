@@ -21,7 +21,7 @@ const app = express();
 
 app.use(cors(
     {
-        origin: ['http://localhost:3000', "https://inventoryapp-phi.vercel.app"], 
+        origin: ['http://localhost:3000', "https://yebirhan-inventoryapp.vercel.app/"], 
         credentials: true
     }
 ));
