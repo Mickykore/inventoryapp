@@ -5,6 +5,7 @@ const asyncHandler = require('express-async-handler');
 const Joi = require('joi');
 const CustomError = require('../utils/customError');
 const bulkProducts = require("./bulkproduct.json")
+const Log = require('../models/Log');
 
 const capitalizeAndClean = (str) => {
     return str.replace(/\s+/g, ' ').trim().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
@@ -104,6 +105,26 @@ const CreateBulkProduct = asyncHandler(async (req, res) => {
                 { new: true, upsert: true, setDefaultsOnInsert: true }
             );
         }));
+
+        // Log the action
+    const logEntry = new Log({
+        userId,
+        actionType: 'create_bulk_product',
+        actionInfo: {
+          products: productsWithUserId.map(p => ({
+            name: p.name,
+            category: p.category,
+            purchasedPrice: p.purchasedPrice,
+            minSellingPrice: p.sellingPriceRange.minSellingPrice,
+            maxSellingPrice: p.sellingPriceRange.maxSellingPrice,
+            quantity: p.quantity,
+            description: p.description,
+            image: p.image,
+          }))
+        }
+      });
+      await logEntry.save();
+
         console.log("ok bulk");
         res.json(bulkProduct);
     } catch (error) {
