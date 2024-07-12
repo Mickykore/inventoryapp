@@ -125,7 +125,7 @@ const Home = () => {
           <span>
             <FaPhoneAlt />
           </span>
-          <p className="fs-1">+251 987 298989</p>
+          <p className="fs-1">+251 912 292684</p>
         </div>
         <div className="location">
           <span>
