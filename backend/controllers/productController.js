@@ -27,7 +27,6 @@ const createCategory = asyncHandler(async (req, res) => {
     console.log(name);
     const existingCategory = await Category.findOne({name});
 
-
     if (existingCategory) {
         res.status(400);
         throw new Error('Category already exists');
